@@ -1,0 +1,107 @@
+{
+    "version": 1,
+    "game": "Castaway Cove",
+    "passed": true,
+    "steps": [
+        {
+            "step": "spawn",
+            "passed": true,
+            "detail": "player spawned at (0.0, 3.9, 3.0) on the start island",
+            "ms": 624.0
+        },
+        {
+            "step": "move",
+            "passed": true,
+            "detail": "walked 3.58 m forward (need 1.5 m)",
+            "ms": 1599.0
+        },
+        {
+            "step": "cast",
+            "passed": true,
+            "detail": "bobber landed on the water, 9 bait left",
+            "ms": 883.0
+        },
+        {
+            "step": "hook",
+            "passed": true,
+            "detail": "bite alert shown, click hooked the fish",
+            "ms": 449.0
+        },
+        {
+            "step": "reel",
+            "passed": true,
+            "detail": "reel minigame completed in 8.4 s without snapping",
+            "ms": 8392.0
+        },
+        {
+            "step": "catch",
+            "passed": true,
+            "detail": "landed Sunny Sardine (0.3 kg) alive and the catch card is showing",
+            "ms": 0.0
+        },
+        {
+            "step": "fight",
+            "passed": true,
+            "detail": "pistol shot damaged the landed fish and the follow-up killed it",
+            "ms": 191.0
+        },
+        {
+            "step": "collect",
+            "passed": true,
+            "detail": "collected the kill into the bag (1 / 8)",
+            "ms": 99.0
+        },
+        {
+            "step": "bag",
+            "passed": true,
+            "detail": "bag holds 1 / 8 fish",
+            "ms": 0.0
+        },
+        {
+            "step": "act",
+            "passed": true,
+            "detail": "cast, hooked, reeled and caught Sunny Sardine using the full fishing loop",
+            "ms": 0.0
+        },
+        {
+            "step": "sell",
+            "passed": true,
+            "detail": "sold the catch for $40, money is now $40",
+            "ms": 0.0
+        },
+        {
+            "step": "buy",
+            "passed": true,
+            "detail": "bought a bait pack for $25; 19 bait and $15 left",
+            "ms": 0.0
+        },
+        {
+            "step": "save",
+            "passed": true,
+            "detail": "save.json written with money $15 at C:/Users/LamHD/AppData/LocalLow/Cove Studio/Castaway Cove\\save.json",
+            "ms": 15.0
+        },
+        {
+            "step": "load",
+            "passed": true,
+            "detail": "reloaded save: money restored to $15, bag empty",
+            "ms": 0.0
+        },
+        {
+            "step": "hud",
+            "passed": true,
+            "detail": "HUD shows money $15, bag 0 / 8, weapon Pistol  7 / 16, HP and hunger bars, and interaction text \"E   Read the quest board\"",
+            "ms": 0.0
+        },
+        {
+            "step": "boss",
+            "passed": true,
+            "detail": "killed the Spider Crab, collected its shell, earned $300 and opened Isle Two",
+            "ms": 289.0
+        }
+    ],
+    "finalMoney": 315,
+    "bagCount": 0,
+    "totalMs": 14109.0,
+    "errors": []
+}
