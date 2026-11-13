@@ -7,12 +7,12 @@
             "step": "spawn",
             "passed": true,
             "detail": "player spawned at (0.0, 3.9, 3.0) on the start island",
-            "ms": 624.0
+            "ms": 629.0
         },
         {
             "step": "move",
             "passed": true,
-            "detail": "walked 3.59 m forward (need 1.5 m)",
+            "detail": "walked 3.58 m forward (need 1.5 m)",
             "ms": 1599.0
         },
         {
@@ -31,7 +31,7 @@
             "step": "reel",
             "passed": true,
             "detail": "reel minigame completed in 8.4 s without snapping",
-            "ms": 8392.0
+            "ms": 8413.0
         },
         {
             "step": "catch",
@@ -49,7 +49,7 @@
             "step": "collect",
             "passed": true,
             "detail": "collected the kill into the bag (1 / 8)",
-            "ms": 100.0
+            "ms": 99.0
         },
         {
             "step": "bag",
@@ -79,7 +79,7 @@
             "step": "save",
             "passed": true,
             "detail": "save.json written with money $15 at C:/Users/LamHD/AppData/LocalLow/Cove Studio/Castaway Cove\\save.json",
-            "ms": 14.0
+            "ms": 16.0
         },
         {
             "step": "load",
@@ -103,17 +103,17 @@
             "step": "bosses",
             "passed": true,
             "detail": "defeated Piranha, Pufferfish, Albatross and Whale; Isles 3, 4 and 5 opened",
-            "ms": 667.0
+            "ms": 666.0
         },
         {
             "step": "services",
             "passed": true,
             "detail": "cooked a fish for 1.5x, spun a skin, bought dynamite, toggled difficulty and logged the Fishipedia",
-            "ms": 10.0
+            "ms": 2.0
         }
     ],
     "finalMoney": 2235,
     "bagCount": 0,
-    "totalMs": 14782.0,
+    "totalMs": 14801.0,
     "errors": []
 }

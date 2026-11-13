@@ -55,39 +55,12 @@ namespace Cove
 
         private void BuildVisual()
         {
-            string model = "Fish1_display";
-            switch (Fish.species)
+            Color tint = Color.white;
+            if (!string.IsNullOrEmpty(Fish.color)) ColorUtility.TryParseHtmlString(Fish.color, out tint);
+            string model = Fish.weight > 5f ? "fish-large" : "fish";
+            var go = CC0Library.SpawnLocal(model, transform, Vector3.zero, 0f, Mathf.Clamp(0.8f + Fish.weight * 0.04f, 0.8f, 1.5f), CCFit.Height, true, tint);
+            if (go != null)
             {
-                case "Coral Perch":
-                case "Lagoon Snapper":
-                case "Amber Tang":
-                case "Moonray Bass":
-                    model = "Fish2_display";
-                    break;
-                case "Stormback Eel":
-                case "Golden Leviathan":
-                    model = "Fish3_display";
-                    break;
-            }
-            var prefab = CC0Library.Prefab(model);
-            if (prefab == null) prefab = CC0Library.Prefab("Fish1_display");
-            if (prefab != null)
-            {
-                var go = Instantiate(prefab, transform, false);
-                go.name = "Fish Visual";
-                go.transform.localPosition = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-                go.transform.localScale = Vector3.one;
-                Bounds b = CC0Library.LocalBounds(go, transform);
-                float target = Mathf.Clamp(0.55f + Fish.weight * 0.035f, 0.55f, 1.1f);
-                float scale = b.size.y > 0.001f ? target / b.size.y : 1f;
-                go.transform.localScale = Vector3.one * scale;
-                Vector3 p = go.transform.localPosition;
-                p.y = -b.min.y * scale + 0.14f;
-                go.transform.localPosition = p;
-                Color tint = Color.white;
-                if (!string.IsNullOrEmpty(Fish.color)) ColorUtility.TryParseHtmlString(Fish.color, out tint);
-                CC0Library.Tint(go, tint);
                 visual = go.transform;
             }
             else
@@ -95,11 +68,15 @@ namespace Cove
                 var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 Destroy(body.GetComponent<Collider>());
                 body.transform.SetParent(transform, false);
-                body.transform.localPosition = new Vector3(0f, 0.2f, 0f);
-                body.transform.localScale = new Vector3(0.32f, 0.42f, 0.7f);
-                Color tint = Color.white;
-                if (!string.IsNullOrEmpty(Fish.color)) ColorUtility.TryParseHtmlString(Fish.color, out tint);
+                body.transform.localPosition = new Vector3(0f, 0.28f, 0f);
+                body.transform.localScale = new Vector3(0.35f, 0.48f, 0.8f);
                 body.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("fishBody", tint, 0.4f);
+                var tail = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Destroy(tail.GetComponent<Collider>());
+                tail.transform.SetParent(transform, false);
+                tail.transform.localPosition = new Vector3(0f, 0.28f, -0.5f);
+                tail.transform.localScale = new Vector3(0.06f, 0.32f, 0.3f);
+                tail.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("fishTail", tint, 0.4f);
                 visual = body.transform;
             }
 

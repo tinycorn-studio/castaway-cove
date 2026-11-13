@@ -19,7 +19,8 @@ rocks-sand-b and patch-sand. Textures: the matching `Textures/colormap.png` besi
 ## Kenney — Survival Kit 2.0
 Created/distributed by Kenney (kenney.nl). License: CC0 1.0.
 Used for: workbench (shop counter), bucket, campfire-fishing-stand, resource-planks,
-signpost-single (quest board), and fish / fish-large (static trophies). Textures: the matching
+signpost-single (quest board), and fish / fish-large (landed catch visuals and shop trophies).
+Textures: the matching
 `Textures/colormap.png` beside the models.
 
 ## Kenney — Mini Characters 1.0
@@ -29,10 +30,10 @@ Textures: the matching `Textures/colormap.png` beside the models.
 
 ## Quaternius — Animated Fish Pack
 Created/distributed by Quaternius (quaternius.com). License: CC0 1.0.
-Used for: Fish1, Fish2 and Fish3 held/catch fish models, mapped across the eight species with
-per-species scale and colour variants. The Swim clips import with the models; the held-fish
-display uses a baked Swim pose so it renders reliably at hold size. Shark is imported for
-completeness but is not part of the catch table.
+Used for: Fish1, Fish2 and Fish3 display poses for the held-fish preview and the Giant Piranha;
+Shark for the Bowhead Whale boss. The Swim clips import with the models; the held-fish display
+uses a baked Swim pose so it renders reliably at hold size. The landed/attacking catch uses the
+Kenney survival fish for a reliable low-poly silhouette.
 
 ## Notes
 All models are imported with Unity's native FBX importer at scale 1 and standard material/texture

@@ -301,7 +301,7 @@ namespace Cove
             Crosshair = cross;
             Crosshair.SetActive(false);
 
-            var target = MakePanel(root, "Target Panel", new Color(0.09f, 0.2f, 0.24f, 0.72f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -96f), new Vector2(420f, 56f));
+            var target = MakePanel(root, "Target Panel", new Color(0.09f, 0.2f, 0.24f, 0.72f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(420f, 56f));
             TargetPanel = target.gameObject;
             TargetNameText = MakeText(target, "", 14, Palette.Cream, TextAnchor.MiddleLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(16f, -8f), new Vector2(388f, 18f));
             var targetBack = MakePanel(target, "Target Track", new Color(0.02f, 0.06f, 0.08f, 0.7f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(16f, 10f), new Vector2(388f, 12f));
