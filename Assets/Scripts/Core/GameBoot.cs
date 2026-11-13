@@ -1285,6 +1285,29 @@ namespace Cove
                     enemy.transform.position = new Vector3(0f, 1.2f, 22.2f);
                 }
                 Combat.EquipWeapon(2);
+                Player.ForceLook(0f, 14f);
+            }
+            else if (shotUi == "fist")
+            {
+                Player.Teleport(new Vector3(0f, 1.6f, 18f), 0f);
+                var preview = new CaughtFish
+                {
+                    species = "Sunny Sardine",
+                    tier = "common",
+                    weight = 1.1f,
+                    value = 45,
+                    baseValue = 45,
+                    rareVariant = false,
+                    color = "#9BD4A0"
+                };
+                var enemy = Combat.SpawnCaughtFish(preview);
+                if (enemy != null)
+                {
+                    enemy.TestMode = true;
+                    enemy.transform.position = new Vector3(0f, 1.2f, 22.2f);
+                }
+                Combat.EquipWeapon(0);
+                Player.ForceLook(0f, 14f);
             }
             else if (shotUi == "boss")
             {
@@ -1310,11 +1333,16 @@ namespace Cove
                 State.pistolMag = 8;
                 State.pistolAmmo = 16;
                 var info = World.Islands[1];
-                float ph = MeshGen.IslandHeight(info.radius, info.height, 0f, 18f, info.seed);
+                float bossGround = MeshGen.IslandHeight(info.radius, info.height, 6f, 5f, info.seed);
                 Player.Controller.enabled = false;
-                Player.transform.position = new Vector3(info.center.x, ph + 2.4f, info.center.z + 20f);
-                Player.ForceLook(180f, -2f);
+                Player.transform.position = new Vector3(info.center.x + 6f, bossGround + 1.6f, info.center.z + 12f);
+                Player.ForceLook(180f, 17f);
                 TrySpawnIslandBoss(1);
+                if (ActiveIslandBoss != null)
+                {
+                    ActiveIslandBoss.TestMode = true;
+                    ActiveIslandBoss.transform.position = Player.transform.position + Player.transform.forward * 8f;
+                }
                 Combat.EquipWeapon(2);
             }
             else if (shotUi == "radar")

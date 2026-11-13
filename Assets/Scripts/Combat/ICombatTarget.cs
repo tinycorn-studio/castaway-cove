@@ -38,13 +38,13 @@ namespace Cove
             {
                 var t = Targets[i];
                 if (t == null || t.IsDead) continue;
-                if (Mathf.Abs(t.transform.position.y - from.y) > 8f) continue;
+                if (Mathf.Abs(t.transform.position.y - from.y) > 3.5f) continue;
                 Vector3 to = t.transform.position - from;
                 float d = to.magnitude;
                 if (d > maxDistance) continue;
                 Vector3 flat = new Vector3(to.x, 0f, to.z);
                 float dot = flat.sqrMagnitude < 0.001f ? 1f : Vector3.Dot(forward, flat.normalized);
-                if (dot < 0.1f) continue;
+                if (dot < 0.5f) continue;
                 float score = d - dot * 3f;
                 if (score < bestScore) { bestScore = score; best = t; }
             }
@@ -62,6 +62,7 @@ namespace Cove
         public virtual Transform AimPoint { get { return transform; } }
         public virtual bool IsAirborne { get { return false; } }
         public virtual bool IsHeadshot(Vector3 point) { return point.y > transform.position.y + 0.35f; }
+        public virtual void SetHighlight(bool on) { }
         public abstract void TakeDamage(int damage, bool headshot, bool melee, bool airborne, Vector3 hitPoint);
 
         protected virtual void OnEnable() { CombatRegistry.Register(this); }

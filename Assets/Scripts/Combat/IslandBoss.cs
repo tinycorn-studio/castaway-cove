@@ -8,6 +8,7 @@ namespace Cove
         public int HpValue;
         public int MaxHpValue;
         public bool Dead;
+        public bool TestMode;
         public int ContactDamage;
 
         private GameBoot game;
@@ -72,9 +73,18 @@ namespace Cove
             else BuildWhale();
 
             var col = gameObject.AddComponent<CapsuleCollider>();
-            col.center = new Vector3(0f, BossType == 3 ? 0.9f : 1.1f, 0f);
-            col.height = BossType == 3 ? 2.0f : 2.4f;
-            col.radius = BossType == 4 ? 1.8f : 1.0f;
+            if (BossType == 4)
+            {
+                col.center = new Vector3(0f, 1.8f, 0f);
+                col.height = 3.6f;
+                col.radius = 2.2f;
+            }
+            else
+            {
+                col.center = new Vector3(0f, BossType == 3 ? 0.9f : 1.1f, 0f);
+                col.height = BossType == 3 ? 2.0f : 2.4f;
+                col.radius = 1.0f;
+            }
 
             stunStars = new GameObject("Stun Stars").transform;
             stunStars.SetParent(transform, false);
@@ -94,18 +104,8 @@ namespace Cove
 
         private void BuildPiranha()
         {
-            var prefab = CC0Library.Prefab("Fish2_display") ?? CC0Library.Prefab("Fish3_display");
-            if (prefab != null)
-            {
-                var go = Instantiate(prefab, transform, false);
-                go.transform.localPosition = new Vector3(0f, 0.7f, 0f);
-                go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                Bounds b = CC0Library.LocalBounds(go, transform);
-                float s = b.size.y > 0.001f ? 1.5f / b.size.y : 1f;
-                go.transform.localScale = Vector3.one * s;
-                CC0Library.Tint(go, new Color32(0xB8, 0x3A, 0x32, 0xFF));
-            }
-            else
+            var go = CC0Library.SpawnLocal("fish-large", transform, Vector3.zero, 0f, 2.2f, CCFit.Height, true, new Color32(0xB8, 0x3A, 0x32, 0xFF));
+            if (go == null)
             {
                 var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 Destroy(body.GetComponent<Collider>());
@@ -189,18 +189,8 @@ namespace Cove
 
         private void BuildWhale()
         {
-            var prefab = CC0Library.Prefab("Shark_display");
-            if (prefab != null)
-            {
-                var go = Instantiate(prefab, transform, false);
-                go.transform.localPosition = new Vector3(0f, 1.2f, 0f);
-                go.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
-                Bounds b = CC0Library.LocalBounds(go, transform);
-                float s = b.size.y > 0.001f ? 3.2f / b.size.y : 1f;
-                go.transform.localScale = Vector3.one * s;
-                CC0Library.Tint(go, new Color32(0x5B, 0x7A, 0x8C, 0xFF));
-            }
-            else
+            var go = CC0Library.SpawnLocal("fish-large", transform, Vector3.zero, 0f, 4.4f, CCFit.Height, true, new Color32(0x5B, 0x7A, 0x8C, 0xFF));
+            if (go == null)
             {
                 var body = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 Destroy(body.GetComponent<Collider>());
@@ -215,8 +205,9 @@ namespace Cove
         {
             if (game == null || !game.Playing) return;
             if (Dead) return;
-            if (player == null) { player = game.Player != null ? game.Player.transform : null; return; }
             SnapToGround();
+            if (TestMode) return;
+            if (player == null) { player = game.Player != null ? game.Player.transform : null; return; }
             bob += Time.deltaTime;
 
             Vector3 to = player.position - transform.position;

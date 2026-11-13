@@ -379,6 +379,7 @@ namespace Cove
                 float rr = radius * (0.2f + (float)rng.NextDouble() * 0.38f);
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
+                if (detailed && (new Vector2(x, z + 5f).magnitude < 7f || new Vector2(x - 8f, z - 1f).magnitude < 3.5f || (z > 10f && Mathf.Abs(x) < 4f))) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 string model = palmVariants[rng.Next(palmVariants.Length)];
                 float targetH = 4.2f + (float)rng.NextDouble() * 2.6f;
@@ -388,13 +389,14 @@ namespace Cove
 
             int rocks = detailed ? 8 : 5;
             string[] rockLarge = { "rocks-sand-a", "rocks-sand-b" };
-            string[] rockSmall = { "rock_smallA", "rock_smallFlatA" };
+            string[] rockSmall = { "rocks-sand-a", "rocks-sand-b" };
             for (int i = 0; i < rocks; i++)
             {
                 float a2 = (float)rng.NextDouble() * Mathf.PI * 2f;
                 float rr = radius * (0.3f + (float)rng.NextDouble() * 0.62f);
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
+                if (detailed && new Vector2(x, z + 5f).magnitude < 7f) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 bool big = rng.NextDouble() < 0.45;
                 string model = big ? rockLarge[rng.Next(rockLarge.Length)] : rockSmall[rng.Next(rockSmall.Length)];
@@ -424,6 +426,7 @@ namespace Cove
                 float rr = radius * (0.12f + (float)rng.NextDouble() * 0.55f);
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
+                if (detailed && new Vector2(x, z + 5f).magnitude < 6f) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 float targetH = 0.2f + (float)rng.NextDouble() * 0.6f;
                 var plant = CC0Library.SpawnLocal(plantModels[rng.Next(plantModels.Length)], root.transform, new Vector3(x, y, z), (float)rng.NextDouble() * 360f, targetH);
@@ -546,6 +549,28 @@ namespace Cove
             shop.transform.SetParent(island);
             shop.transform.localPosition = new Vector3(0f, h, -5f);
 
+            var canopy = new GameObject("Shop Canopy");
+            canopy.transform.SetParent(shop.transform, false);
+            var roof = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(roof.GetComponent<Collider>());
+            roof.transform.SetParent(canopy.transform, false);
+            roof.transform.localPosition = new Vector3(0f, 4.3f, 0f);
+            roof.transform.localScale = new Vector3(7.6f, 0.2f, 3.8f);
+            roof.GetComponent<MeshRenderer>().sharedMaterial = woodMat;
+            for (int side = -1; side <= 1; side += 2)
+            {
+                for (int zside = -1; zside <= 1; zside += 2)
+                {
+                    var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    Destroy(post.GetComponent<Collider>());
+                    post.transform.SetParent(canopy.transform, false);
+                    post.transform.localPosition = new Vector3(side * 3.5f, 2.1f, zside * 1.9f);
+                    post.transform.localScale = new Vector3(0.16f, 2.1f, 0.16f);
+                    post.GetComponent<MeshRenderer>().sharedMaterial = woodDarkMat;
+                }
+            }
+            AddLabel(canopy.transform, new Vector3(0f, 3.15f, 2.72f), "", 34, 0.04f, Palette.Cream, new Vector3(0f, 180f, 0f));
+
             CC0Library.SpawnLocal("fence_planks", shop.transform, new Vector3(0f, 0f, -2.4f), 0f, 1.75f);
             var planks = CC0Library.SpawnLocal("resource-planks", shop.transform, new Vector3(-3.1f, 0f, -2.0f), 22f, 0.35f);
             if (planks != null) CC0Library.AddBoxCollider(planks);
@@ -605,7 +630,7 @@ namespace Cove
 
             var rack = new GameObject("Weapon Rack");
             rack.transform.SetParent(shop.transform, false);
-            rack.transform.localPosition = new Vector3(3.5f, 0f, 1.5f);
+            rack.transform.localPosition = new Vector3(5.2f, 0f, 0.2f);
             var rackCrate = CC0Library.SpawnLocal("crate", rack.transform, Vector3.zero, 12f, 1.2f);
             if (rackCrate != null) CC0Library.AddBoxCollider(rackCrate);
             var rackCol = rack.AddComponent<BoxCollider>();
@@ -619,7 +644,7 @@ namespace Cove
 
             var bait = new GameObject("Crab Bait");
             bait.transform.SetParent(shop.transform, false);
-            bait.transform.localPosition = new Vector3(-3.4f, 0f, 1.6f);
+            bait.transform.localPosition = new Vector3(-5.2f, 0f, 7.5f);
             CC0Library.SpawnLocal("bucket", bait.transform, Vector3.zero, 0f, 0.55f);
             var baitCol = bait.AddComponent<BoxCollider>();
             baitCol.center = new Vector3(0f, 0.5f, 0f);
@@ -632,7 +657,7 @@ namespace Cove
 
             var grill = new GameObject("Grill");
             grill.transform.SetParent(shop.transform, false);
-            grill.transform.localPosition = new Vector3(-2.2f, 0f, 3.2f);
+            grill.transform.localPosition = new Vector3(-5.2f, 0f, -0.4f);
             CC0Library.SpawnLocal("campfire-fishing-stand", grill.transform, Vector3.zero, 0f, 0.8f);
             var grillCol = grill.AddComponent<BoxCollider>();
             grillCol.center = new Vector3(0f, 0.6f, 0f);
@@ -645,7 +670,7 @@ namespace Cove
 
             var fortune = new GameObject("Reel of Fortune");
             fortune.transform.SetParent(shop.transform, false);
-            fortune.transform.localPosition = new Vector3(0.6f, 0f, 3.4f);
+            fortune.transform.localPosition = new Vector3(5.2f, 0f, 3.8f);
             CC0Library.SpawnLocal("chest", fortune.transform, Vector3.zero, 0f, 0.9f);
             var fortuneCol = fortune.AddComponent<BoxCollider>();
             fortuneCol.center = new Vector3(0f, 0.6f, 0f);
@@ -659,7 +684,7 @@ namespace Cove
             var board = new GameObject("Quest Board");
             board.transform.SetParent(island);
             float bh = MeshGen.IslandHeight(20f, 4.2f, 6f, 1f, 11);
-            board.transform.localPosition = new Vector3(6f, bh, 1f);
+            board.transform.localPosition = new Vector3(8f, bh, 1f);
             board.transform.localRotation = Quaternion.Euler(0f, -18f, 0f);
 
             var sign = CC0Library.SpawnLocal("signpost-single", board.transform, Vector3.zero, 0f, 2.35f);
@@ -908,7 +933,7 @@ namespace Cove
             var board = new GameObject("Quest Board");
             board.transform.SetParent(island);
             float bh = MeshGen.IslandHeight(20f, 4.2f, 6f, 1f, 11);
-            board.transform.localPosition = new Vector3(6f, bh, 1f);
+            board.transform.localPosition = new Vector3(8f, bh, 1f);
             board.transform.localRotation = Quaternion.Euler(0f, -18f, 0f);
 
             var post1 = GameObject.CreatePrimitive(PrimitiveType.Cylinder);

@@ -13,6 +13,9 @@ namespace Cove
         private GameObject weaponRoot;
         private GameObject[] weaponVisuals = new GameObject[4];
         private readonly List<Renderer> weaponParts = new List<Renderer>();
+        private Vector3 weaponRootBasePos;
+        private Quaternion weaponRootBaseRot;
+        private float punchTimer;
         private float nextAttack;
         private float invuln;
         private float hudTimer;
@@ -21,6 +24,7 @@ namespace Cove
         private float reloadTimer;
         private int reloadWeapon = -1;
         private CombatTarget hudTarget;
+        private CombatTarget highlightedTarget;
 
         private void Start()
         {
@@ -61,11 +65,36 @@ namespace Cove
             if (targetTimer <= 0f && game.UI != null)
             {
                 targetTimer = 0.1f;
-                hudTarget = CombatRegistry.Nearest(transform.position, 24f, transform.forward);
-                if (hudTarget != null && !hudTarget.IsDead)
+                CombatTarget aimed = null;
+                RaycastHit aimHit;
+                if (Physics.Raycast(Cam.transform.position, Cam.transform.forward, out aimHit, 35f, ~0, QueryTriggerInteraction.Collide))
+                    aimed = aimHit.collider.GetComponentInParent<CombatTarget>();
+                if (aimed == null)
+                    aimed = CombatRegistry.Nearest(transform.position, 20f, transform.forward);
+                if (aimed != null && aimed.IsDead) aimed = null;
+                hudTarget = aimed;
+                if (highlightedTarget != null && highlightedTarget != aimed) highlightedTarget.SetHighlight(false);
+                highlightedTarget = aimed;
+                if (highlightedTarget != null) highlightedTarget.SetHighlight(true);
+                if (hudTarget != null)
                     game.UI.SetTargetBar(true, hudTarget.TargetName, hudTarget.Hp, hudTarget.MaxHp, hudTarget.IsBoss);
                 else
                     game.UI.SetTargetBar(false, "", 0f, 0f, false);
+                game.UI.SetCrosshairTarget(hudTarget != null);
+            }
+
+            if (punchTimer > 0f && weaponRoot != null)
+            {
+                punchTimer -= Time.deltaTime;
+                float t = 1f - Mathf.Clamp01(punchTimer / 0.22f);
+                float jab = Mathf.Sin(t * Mathf.PI);
+                weaponRoot.transform.localPosition = weaponRootBasePos + new Vector3(0f, -0.02f, 0.2f) * jab;
+                weaponRoot.transform.localRotation = weaponRootBaseRot * Quaternion.Euler(10f * jab, 0f, 0f);
+            }
+            else if (weaponRoot != null)
+            {
+                weaponRoot.transform.localPosition = weaponRootBasePos;
+                weaponRoot.transform.localRotation = weaponRootBaseRot;
             }
         }
 
@@ -190,11 +219,13 @@ namespace Cove
                 if (d < best) { best = d; target = t; }
             }
             if (Audio != null) Audio.Play(Audio.Punch, 0.65f, 1f);
+            punchTimer = 0.22f;
             if (target != null)
             {
                 bool head = target.IsHeadshot(target.transform.position + Vector3.up * 0.4f);
                 target.TakeDamage(def.damage, head, true, target.IsAirborne, target.transform.position);
                 if (Audio != null) Audio.Play(Audio.Hit, 0.7f, 1f);
+                HitSpark(target.transform.position + Vector3.up * 0.35f);
             }
             Recoil(0.4f);
         }
@@ -479,8 +510,16 @@ namespace Cove
             weaponRoot.transform.SetParent(Cam.transform, false);
             weaponRoot.transform.localPosition = new Vector3(0.3f, -0.27f, 0.68f);
             weaponRoot.transform.localRotation = Quaternion.Euler(2f, -16f, 0f);
+            weaponRootBasePos = weaponRoot.transform.localPosition;
+            weaponRootBaseRot = weaponRoot.transform.localRotation;
 
-            weaponVisuals[0] = null;
+            var fists = new GameObject("Fists");
+            fists.transform.SetParent(weaponRoot.transform, false);
+            fists.transform.localPosition = new Vector3(0.02f, -0.04f, 0.04f);
+            AddPrimitive(fists.transform, PrimitiveType.Capsule, new Vector3(0f, -0.09f, 0.06f), new Vector3(0.08f, 0.16f, 0.08f), new Color32(0xC9, 0x93, 0x6A, 0xFF), new Vector3(72f, 0f, 0f));
+            AddPrimitive(fists.transform, PrimitiveType.Sphere, new Vector3(0f, 0.02f, 0.24f), new Vector3(0.16f, 0.14f, 0.16f), new Color32(0xD9, 0xA4, 0x7A, 0xFF), Vector3.zero);
+            AddPrimitive(fists.transform, PrimitiveType.Sphere, new Vector3(-0.08f, 0.04f, 0.28f), new Vector3(0.07f, 0.055f, 0.09f), new Color32(0xD9, 0xA4, 0x7A, 0xFF), Vector3.zero);
+            weaponVisuals[0] = fists;
 
             var knife = new GameObject("Knife");
             knife.transform.SetParent(weaponRoot.transform, false);
@@ -519,9 +558,20 @@ namespace Cove
             go.transform.localPosition = pos;
             go.transform.localScale = scale;
             go.transform.localRotation = Quaternion.Euler(euler);
-            var renderer = go.GetComponent<MeshRenderer>();
-            renderer.sharedMaterial = WorldBuilder.MakeMat("weaponPart", color, 0.35f);
-            weaponParts.Add(renderer);
+            go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("weaponPart", color, 0.35f);
+            weaponParts.Add(go.GetComponent<MeshRenderer>());
+        }
+
+        private void AddPrimitive(Transform parent, PrimitiveType type, Vector3 pos, Vector3 scale, Color color, Vector3 euler)
+        {
+            var go = GameObject.CreatePrimitive(type);
+            Destroy(go.GetComponent<Collider>());
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = pos;
+            go.transform.localScale = scale;
+            go.transform.localRotation = Quaternion.Euler(euler);
+            go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("weaponPart", color, 0.35f);
+            weaponParts.Add(go.GetComponent<MeshRenderer>());
         }
 
         public void ApplySkin(int index)
@@ -545,7 +595,7 @@ namespace Cove
             if (weaponRoot == null) return;
             bool rod = GameBoot.I != null && GameBoot.I.Fishing != null && GameBoot.I.Fishing.RodEquipped;
             bool blocked = GameBoot.I != null && GameBoot.I.UI != null && GameBoot.I.UI.AnyPanelOpen;
-            bool show = !rod && !blocked && GameBoot.I != null && GameBoot.I.Playing && State.weaponIndex > 0;
+            bool show = !rod && !blocked && GameBoot.I != null && GameBoot.I.Playing;
             weaponRoot.SetActive(show);
             for (int i = 0; i < weaponVisuals.Length; i++)
                 if (weaponVisuals[i] != null) weaponVisuals[i].SetActive(i == State.weaponIndex);
@@ -575,6 +625,16 @@ namespace Cove
             go.transform.localScale = Vector3.one * 0.06f;
             go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("muzzle", new Color32(0xFF, 0xD8, 0x6A, 0xFF), 0.1f);
             Destroy(go, 0.05f);
+        }
+
+        private void HitSpark(Vector3 position)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Destroy(go.GetComponent<Collider>());
+            go.transform.position = position;
+            go.transform.localScale = Vector3.one * 0.12f;
+            go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("hitSpark", new Color32(0xFF, 0xD8, 0x6A, 0xFF), 0.1f);
+            Destroy(go, 0.12f);
         }
     }
 }

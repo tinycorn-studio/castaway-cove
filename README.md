@@ -98,6 +98,7 @@ Cờ dòng lệnh: `-selfTest` / `--self-test <file>`, `--screenshot <file> --sh
 
 ## Lịch sử phiên bản
 
+- **0.2.1** (2026-11-12): polish visual: cá rõ/highlight, tay đấm, Mira idle + bubble, shop layout, boss fish-large.
 - **0.2.0** (2026-11-12): 5 đảo + 5 boss, quest chain, radar/boat keys, cooking, Drip,
   Fishipedia, gacha/casino, difficulty, dynamite, seagull, self-test 18 bước.
 - **0.1.0** (2026-11-12): bản đầu tiên gồm câu cá, combat, vũ khí, Spider Crab, shop,

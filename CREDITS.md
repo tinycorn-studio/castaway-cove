@@ -30,10 +30,9 @@ Textures: the matching `Textures/colormap.png` beside the models.
 
 ## Quaternius — Animated Fish Pack
 Created/distributed by Quaternius (quaternius.com). License: CC0 1.0.
-Used for: Fish1, Fish2 and Fish3 display poses for the held-fish preview and the Giant Piranha;
-Shark for the Bowhead Whale boss. The Swim clips import with the models; the held-fish display
-uses a baked Swim pose so it renders reliably at hold size. The landed/attacking catch uses the
-Kenney survival fish for a reliable low-poly silhouette.
+Used for: Fish1, Fish2 and Fish3 display poses for the held-fish preview. Shark is imported for
+completeness. The Giant Piranha and Bowhead Whale bosses now use the Kenney survival fish-large
+model for a reliable low-poly silhouette; the landed/attacking catch uses the smaller Kenney fish.
 
 ## Notes
 All models are imported with Unity's native FBX importer at scale 1 and standard material/texture

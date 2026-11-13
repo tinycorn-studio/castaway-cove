@@ -25,6 +25,7 @@ namespace Cove
         private float stunTimer;
         private bool collected;
         private string bonusText;
+        private GameObject highlightRing;
 
         public override string TargetName { get { return Fish != null ? Fish.species : "Fish"; } }
         public override int Hp { get { return HpValue; } }
@@ -62,6 +63,16 @@ namespace Cove
             if (go != null)
             {
                 visual = go.transform;
+                float eyeSize = Mathf.Clamp(0.8f + Fish.weight * 0.04f, 0.8f, 1.5f);
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    var eye = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    Destroy(eye.GetComponent<Collider>());
+                    eye.transform.SetParent(transform, false);
+                    eye.transform.localPosition = new Vector3(side * 0.16f * eyeSize, 0.38f * eyeSize, 0.42f * eyeSize);
+                    eye.transform.localScale = Vector3.one * (0.055f * eyeSize);
+                    eye.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("fishEye", new Color32(0x1C, 0x22, 0x28, 0xFF), 0.6f);
+                }
             }
             else
             {
@@ -85,6 +96,23 @@ namespace Cove
             Bounds wb = CC0Library.LocalBounds(gameObject, transform);
             box.center = new Vector3(0f, 0.22f, 0f);
             box.size = new Vector3(Mathf.Max(0.35f, wb.size.x), Mathf.Max(0.28f, wb.size.y), Mathf.Max(0.55f, wb.size.z));
+
+            highlightRing = new GameObject("Target Ring");
+            highlightRing.transform.SetParent(transform, false);
+            highlightRing.transform.localPosition = new Vector3(0f, 0.03f, 0f);
+            for (int i = 0; i < 12; i++)
+            {
+                float a = i * Mathf.PI * 2f / 12f;
+                var seg = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Destroy(seg.GetComponent<Collider>());
+                seg.transform.SetParent(highlightRing.transform, false);
+                seg.transform.localPosition = new Vector3(Mathf.Cos(a) * 0.72f, 0f, Mathf.Sin(a) * 0.72f);
+                seg.transform.localScale = new Vector3(0.24f, 0.02f, 0.07f);
+                seg.transform.localRotation = Quaternion.Euler(0f, -a * Mathf.Rad2Deg, 0f);
+                seg.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("targetRing", new Color32(0xFF, 0xD1, 0x6A, 0xFF), 0.1f);
+                seg.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+            highlightRing.SetActive(false);
         }
 
         private void Update()
@@ -96,6 +124,11 @@ namespace Cove
                 if (Dead) transform.rotation = Quaternion.Euler(90f, transform.eulerAngles.y, 0f);
                 return;
             }
+
+            if (highlightRing != null && highlightRing.activeSelf)
+                highlightRing.transform.Rotate(0f, 140f * Time.deltaTime, 0f, Space.Self);
+            if (visual != null)
+                visual.localRotation = Quaternion.Euler(0f, Mathf.Sin(Time.time * 7f + hopPhase) * 7f, 0f);
 
             var player = game.Player;
             if (player == null) return;
@@ -152,6 +185,11 @@ namespace Cove
             return point.y > transform.position.y + 0.2f;
         }
 
+        public override void SetHighlight(bool on)
+        {
+            if (highlightRing != null) highlightRing.SetActive(on && !Dead);
+        }
+
         public override void TakeDamage(int damage, bool headshot, bool melee, bool airborne, Vector3 hitPoint)
         {
             if (Dead) return;
@@ -179,6 +217,7 @@ namespace Cove
         {
             if (Dead) return;
             Dead = true;
+            if (highlightRing != null) highlightRing.SetActive(false);
             float mult = 1f;
             bonusText = "";
             if (LastHitHeadshot) { mult += 0.25f; bonusText += "Headshot "; }

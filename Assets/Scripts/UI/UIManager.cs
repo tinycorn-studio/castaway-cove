@@ -137,6 +137,7 @@ namespace Cove
         public Text WorldStatus;
 
         private readonly List<GameObject> toasts = new List<GameObject>();
+        private readonly List<Image> crosshairParts = new List<Image>();
         private Coroutine catchRoutine;
         private Coroutine damageRoutine;
         private float bitePulse;
@@ -300,6 +301,7 @@ namespace Cove
             MakePanel(cross.transform, "Down", new Color(1f, 0.98f, 0.9f, 0.8f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -11f), new Vector2(1.5f, 7f));
             Crosshair = cross;
             Crosshair.SetActive(false);
+            crosshairParts.AddRange(cross.GetComponentsInChildren<Image>());
 
             var target = MakePanel(root, "Target Panel", new Color(0.09f, 0.2f, 0.24f, 0.72f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -250f), new Vector2(420f, 56f));
             TargetPanel = target.gameObject;
@@ -991,6 +993,13 @@ namespace Cove
         {
             if (WeaponText != null) WeaponText.text = text;
             if (Crosshair != null) Crosshair.SetActive(showCrosshair);
+        }
+
+        public void SetCrosshairTarget(bool on)
+        {
+            Color c = on ? Palette.Coral : new Color(1f, 0.98f, 0.9f, 0.85f);
+            for (int i = 0; i < crosshairParts.Count; i++)
+                if (crosshairParts[i] != null) crosshairParts[i].color = c;
         }
 
         public void SetTargetBar(bool show, string name, float hp, float maxHp, bool boss)

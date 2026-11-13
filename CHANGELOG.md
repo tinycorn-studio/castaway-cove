@@ -3,6 +3,16 @@
 Mọi thay đổi đáng chú ý của dự án được ghi ở đây. Định dạng theo
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo SemVer.
 
+## [0.2.1] - 2026-11-12
+
+### Changed
+- Cá khi câu/chiến đấu dùng Kenney fish/fish-large, có mắt, wiggle và target ring vàng.
+- Target bar dời lên top-center; crosshair đổi màu khi ngắm trúng mục tiêu.
+- Thêm model tay đấm + animation punch + hit spark cho đòn cận chiến.
+- Mira có idle bob/sway, vẫy tay và bong bóng "HI!"; shop có canopy, các quầy tách
+  khoảng và dọn cây cọ quanh khu shop.
+- Piranha/Whale boss dùng fish-large; bỏ đá xám khỏi đảo; bố trí lại shop.
+
 ## [0.2.0] - 2026-11-12
 
 ### Added
