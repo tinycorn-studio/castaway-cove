@@ -24,6 +24,7 @@ namespace Cove
         private float chargeTime;
         private float telegraphTime;
         private float stunTime;
+        private bool debugLogged;
 
         public override string TargetName
         {

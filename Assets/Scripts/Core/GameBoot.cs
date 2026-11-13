@@ -1336,7 +1336,7 @@ namespace Cove
                 float bossGround = MeshGen.IslandHeight(info.radius, info.height, 6f, 5f, info.seed);
                 Player.Controller.enabled = false;
                 Player.transform.position = new Vector3(info.center.x + 6f, bossGround + 1.6f, info.center.z + 12f);
-                Player.ForceLook(180f, 17f);
+                Player.ForceLook(180f, -13f);
                 TrySpawnIslandBoss(1);
                 if (ActiveIslandBoss != null)
                 {

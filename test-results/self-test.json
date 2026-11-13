@@ -7,7 +7,7 @@
             "step": "spawn",
             "passed": true,
             "detail": "player spawned at (0.0, 3.9, 3.0) on the start island",
-            "ms": 626.0
+            "ms": 624.0
         },
         {
             "step": "move",
@@ -31,7 +31,7 @@
             "step": "reel",
             "passed": true,
             "detail": "reel minigame completed in 8.4 s without snapping",
-            "ms": 8391.0
+            "ms": 8408.0
         },
         {
             "step": "catch",
@@ -43,13 +43,13 @@
             "step": "fight",
             "passed": true,
             "detail": "pistol shot damaged the landed fish and the follow-up killed it",
-            "ms": 192.0
+            "ms": 175.0
         },
         {
             "step": "collect",
             "passed": true,
             "detail": "collected the kill into the bag (1 / 8)",
-            "ms": 99.0
+            "ms": 100.0
         },
         {
             "step": "bag",
@@ -79,7 +79,7 @@
             "step": "save",
             "passed": true,
             "detail": "save.json written with money $15 at C:/Users/LamHD/AppData/LocalLow/Cove Studio/Castaway Cove\\save.json",
-            "ms": 17.0
+            "ms": 16.0
         },
         {
             "step": "load",
@@ -114,6 +114,6 @@
     ],
     "finalMoney": 2235,
     "bagCount": 0,
-    "totalMs": 14789.0,
+    "totalMs": 14781.0,
     "errors": []
 }

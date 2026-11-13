@@ -380,6 +380,7 @@ namespace Cove
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
                 if (detailed && (new Vector2(x, z + 5f).magnitude < 7f || new Vector2(x - 8f, z - 1f).magnitude < 3.5f || (z > 10f && Mathf.Abs(x) < 4f))) continue;
+                if (!detailed && (new Vector2(x - 6f, z - 5f).magnitude < 5.5f || new Vector2(x, z - 4f).magnitude < 3.5f)) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 string model = palmVariants[rng.Next(palmVariants.Length)];
                 float targetH = 4.2f + (float)rng.NextDouble() * 2.6f;
@@ -397,6 +398,7 @@ namespace Cove
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
                 if (detailed && new Vector2(x, z + 5f).magnitude < 7f) continue;
+                if (!detailed && new Vector2(x - 6f, z - 5f).magnitude < 5.5f) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 bool big = rng.NextDouble() < 0.45;
                 string model = big ? rockLarge[rng.Next(rockLarge.Length)] : rockSmall[rng.Next(rockSmall.Length)];
@@ -427,6 +429,7 @@ namespace Cove
                 float x = Mathf.Cos(a2) * rr;
                 float z = Mathf.Sin(a2) * rr;
                 if (detailed && new Vector2(x, z + 5f).magnitude < 6f) continue;
+                if (!detailed && new Vector2(x - 6f, z - 5f).magnitude < 4.5f) continue;
                 float y = MeshGen.IslandHeight(radius, height, x, z, seed);
                 float targetH = 0.2f + (float)rng.NextDouble() * 0.6f;
                 var plant = CC0Library.SpawnLocal(plantModels[rng.Next(plantModels.Length)], root.transform, new Vector3(x, y, z), (float)rng.NextDouble() * 360f, targetH);
