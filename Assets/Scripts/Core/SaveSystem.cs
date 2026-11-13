@@ -18,7 +18,20 @@ namespace Cove
         public int earnedTotal;
         public bool island2;
         public bool island3;
+        public bool island4;
+        public bool island5;
         public bool catchQuestDone;
+        public bool boatKeys;
+        public bool radarOwned;
+        public bool piranhaKilled;
+        public bool pufferKilled;
+        public bool albatrossKilled;
+        public bool whaleKilled;
+        public List<string> discovered = new List<string>();
+        public List<string> achievements = new List<string>();
+        public int skinIndex = -1;
+        public bool hardMode;
+        public int dynamite;
         public float hp = 100f;
         public float hunger = 100f;
         public int kills;
@@ -66,7 +79,20 @@ namespace Cove
                     earnedTotal = g.earnedTotal,
                     island2 = g.island2,
                     island3 = g.island3,
+                    island4 = g.island4,
+                    island5 = g.island5,
                     catchQuestDone = g.catchQuestDone,
+                    boatKeys = g.boatKeys,
+                    radarOwned = g.radarOwned,
+                    piranhaKilled = g.piranhaKilled,
+                    pufferKilled = g.pufferKilled,
+                    albatrossKilled = g.albatrossKilled,
+                    whaleKilled = g.whaleKilled,
+                    discovered = new List<string>(g.discovered),
+                    achievements = new List<string>(g.achievements),
+                    skinIndex = g.skinIndex,
+                    hardMode = g.hardMode,
+                    dynamite = g.dynamite,
                     hp = g.hp,
                     hunger = g.hunger,
                     kills = g.kills,

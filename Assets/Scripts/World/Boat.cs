@@ -90,7 +90,13 @@ namespace Cove
                 }
             }
 
-            float limit = game.State.island2 ? (game.State.island3 ? 260f : 99f) : 46f;
+            float limit;
+            string blockMessage;
+            if (!game.State.island2) { limit = 46f; blockMessage = "A strong current blocks the way. Defeat the Spider Crab and hand in its shell."; }
+            else if (!game.State.island3) { limit = 100f; blockMessage = "The current pushes back. Defeat the Giant Piranha on Isle Two."; }
+            else if (!game.State.island4) { limit = 165f; blockMessage = "The current pushes back. Defeat the Pufferfish on Isle Three."; }
+            else if (!game.State.island5) { limit = 240f; blockMessage = "The current pushes back. Defeat the Albatross on Isle Four."; }
+            else { limit = 320f; blockMessage = ""; }
             Vector2 fromHome = new Vector2(next.x, next.z);
             if (fromHome.magnitude > limit)
             {
@@ -100,8 +106,7 @@ namespace Cove
                 if (currentCooldown <= 0f)
                 {
                     currentCooldown = 4f;
-                    if (!game.State.island2) game.UI.Toast("A strong current blocks the way. Earn $100 to unlock new waters.");
-                    else game.UI.Toast("The far current pushes back. Earn $500 to unlock the last island.");
+                    if (!string.IsNullOrEmpty(blockMessage)) game.UI.Toast(blockMessage);
                 }
             }
 

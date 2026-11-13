@@ -3,6 +3,22 @@
 Mọi thay đổi đáng chú ý của dự án được ghi ở đây. Định dạng theo
 [Keep a Changelog](https://keepachangelog.com/vi/1.1.0/), phiên bản theo SemVer.
 
+## [0.2.0] - 2026-11-12
+
+### Added
+- Năm đảo và năm boss: Spider Crab, Giant Piranha, Pufferfish, Albatross, Mutated Whale.
+- Quest chain 5 bước, trophy boss, boat keys và radar hiện khoảng cách/khóa đảo.
+- Cá theo từng đảo (8 loài, pool theo độ khó), Drip variant 10% (8x value).
+- Grill (1.5x, 15% cháy), lava cook an toàn trên Isle Five; cá nấu hồi nhiều máu hơn.
+- Fishipedia (Tab) và achievements.
+- Reel of Fortune gacha, roulette, slots; skin đổi màu vũ khí.
+- Difficulty Normal/Hard; dynamite (phím 5); seagull bắn được.
+- Self-test mở rộng lên 18 bước, gồm boss chain, cooking, gacha, dynamite, difficulty.
+
+### Changed
+- Thuyền bị khóa đến khi lấy boat keys từ Spider Crab; giới hạn dòng chảy mở theo tiến trình đảo.
+- Quest board, HUD và menu cập nhật cho 5 đảo và các tính năng mới.
+
 ## [0.1.0] - 2026-11-12
 
 ### Added

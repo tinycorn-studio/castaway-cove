@@ -133,6 +133,8 @@ namespace Cove
         public string name;
         public Vector3 center;
         public float radius;
+        public float height;
+        public int seed;
     }
 
     public class WorldBuilder : MonoBehaviour
@@ -171,8 +173,16 @@ namespace Cove
             var start = CreateIsland("Cove Island", Vector3.zero, 20f, 4.2f, 11, true);
             var isle2 = CreateIsland("Isle Two", new Vector3(-74f, 0f, 52f), 14f, 3.6f, 23, false);
             var isle3 = CreateIsland("Isle Three", new Vector3(84f, 0f, -62f), 16f, 4.6f, 37, false);
+            var isle4 = CreateIsland("Isle Four", new Vector3(150f, 0f, 40f), 15f, 4.0f, 41, false);
+            var isle5 = CreateIsland("Isle Five", new Vector3(60f, 0f, -180f), 18f, 5.0f, 53, false);
 
             BuildStartVillage(start);
+            BuildBossAltar(isle2, 1, 14f, 3.6f, 23);
+            BuildBossAltar(isle3, 2, 16f, 4.6f, 37);
+            BuildBossAltar(isle4, 3, 15f, 4.0f, 41);
+            BuildBossAltar(isle5, 4, 18f, 5.0f, 53);
+            BuildLavaVent(isle5, 18f, 5.0f, 53);
+            BuildSeagulls();
             BuildDock();
 
             StartSpawn = new GameObject("StartSpawn").transform;
@@ -337,7 +347,7 @@ namespace Cove
             var root = new GameObject(name);
             root.transform.SetParent(transform);
             root.transform.position = center;
-            Islands.Add(new IslandInfo { name = name, center = center, radius = radius });
+            Islands.Add(new IslandInfo { name = name, center = center, radius = radius, height = height, seed = seed });
 
             var sand = new GameObject("Sand");
             sand.transform.SetParent(root.transform, false);
@@ -565,10 +575,9 @@ namespace Cove
             var npc = CC0Library.SpawnLocal("character-female-a", shop.transform, new Vector3(1.7f, 0f, -0.8f), 0f, 1.65f);
             if (npc != null)
             {
-                var bob = npc.AddComponent<IdleBob>();
-                bob.Height = 0.022f;
-                bob.Speed = 1.35f;
-                bob.Phase = 0.8f;
+                var bob = npc.AddComponent<ShopkeeperIdle>();
+                bob.WaveEvery = 7f;
+                bob.Speed = 1.4f;
                 var cap = npc.AddComponent<CapsuleCollider>();
                 Bounds nb = CC0Library.LocalBounds(npc, npc.transform);
                 cap.center = new Vector3(nb.center.x, nb.size.y * 0.45f, nb.center.z);
@@ -621,6 +630,32 @@ namespace Cove
             baitInteract.onInteract = () => GameBoot.I.TrySpawnBoss();
             AddLabel(bait.transform, new Vector3(0f, 1.15f, 0f), "CRAB BAIT", 34, 0.04f, Palette.Coral, new Vector3(0f, 180f, 0f));
 
+            var grill = new GameObject("Grill");
+            grill.transform.SetParent(shop.transform, false);
+            grill.transform.localPosition = new Vector3(-2.2f, 0f, 3.2f);
+            CC0Library.SpawnLocal("campfire-fishing-stand", grill.transform, Vector3.zero, 0f, 0.8f);
+            var grillCol = grill.AddComponent<BoxCollider>();
+            grillCol.center = new Vector3(0f, 0.6f, 0f);
+            grillCol.size = new Vector3(1.5f, 1.4f, 1.5f);
+            grillCol.isTrigger = true;
+            var grillInteract = grill.AddComponent<Interactable>();
+            grillInteract.prompt = "E   Use the grill";
+            grillInteract.onInteract = () => GameBoot.I.OpenGrill();
+            AddLabel(grill.transform, new Vector3(0f, 1.35f, 0f), "GRILL", 34, 0.04f, Palette.Gold, new Vector3(0f, 180f, 0f));
+
+            var fortune = new GameObject("Reel of Fortune");
+            fortune.transform.SetParent(shop.transform, false);
+            fortune.transform.localPosition = new Vector3(0.6f, 0f, 3.4f);
+            CC0Library.SpawnLocal("chest", fortune.transform, Vector3.zero, 0f, 0.9f);
+            var fortuneCol = fortune.AddComponent<BoxCollider>();
+            fortuneCol.center = new Vector3(0f, 0.6f, 0f);
+            fortuneCol.size = new Vector3(1.5f, 1.3f, 1.5f);
+            fortuneCol.isTrigger = true;
+            var fortuneInteract = fortune.AddComponent<Interactable>();
+            fortuneInteract.prompt = "E   Spin the Reel of Fortune";
+            fortuneInteract.onInteract = () => GameBoot.I.OpenFortune();
+            AddLabel(fortune.transform, new Vector3(0f, 1.45f, 0f), "REEL OF FORTUNE", 30, 0.035f, Palette.Gold, new Vector3(0f, 180f, 0f));
+
             var board = new GameObject("Quest Board");
             board.transform.SetParent(island);
             float bh = MeshGen.IslandHeight(20f, 4.2f, 6f, 1f, 11);
@@ -642,6 +677,70 @@ namespace Cove
 
             float fy = MeshGen.IslandHeight(20f, 4.2f, 11f, 8f, 11);
             CC0Library.SpawnLocal("campfire-fishing-stand", island, new Vector3(11f, fy, 8f), 32f, 0.95f);
+        }
+
+        private void BuildBossAltar(Transform island, int type, float radius, float height, int seed)
+        {
+            string bossName = GameBoot.IslandBossName(type).ToUpperInvariant();
+            float h = MeshGen.IslandHeight(radius, height, 0f, 4f, seed);
+            var altar = new GameObject(bossName + " Altar");
+            altar.transform.SetParent(island, false);
+            altar.transform.localPosition = new Vector3(0f, h, 4f);
+
+            var sign = CC0Library.SpawnLocal("signpost-single", altar.transform, Vector3.zero, 0f, 2.5f);
+            if (sign == null)
+            {
+                var post = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                post.transform.SetParent(altar.transform, false);
+                post.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+                post.transform.localScale = new Vector3(0.18f, 1.2f, 0.18f);
+                post.GetComponent<MeshRenderer>().sharedMaterial = woodDarkMat;
+            }
+            AddLabel(altar.transform, new Vector3(0f, 2.55f, 0.05f), bossName, 40, 0.05f, Palette.Coral, new Vector3(0f, 180f, 0f));
+            AddLabel(altar.transform, new Vector3(0f, 2.18f, 0.06f), "E to challenge", 28, 0.036f, Palette.Cream, new Vector3(0f, 180f, 0f));
+
+            var trigger = altar.AddComponent<BoxCollider>();
+            trigger.center = new Vector3(0f, 1.3f, 0f);
+            trigger.size = new Vector3(3.4f, 2.6f, 3.2f);
+            trigger.isTrigger = true;
+            var interact = altar.AddComponent<Interactable>();
+            interact.prompt = "E   Challenge the " + GameBoot.IslandBossName(type);
+            interact.onInteract = () => GameBoot.I.TrySpawnIslandBoss(type);
+        }
+
+        private void BuildSeagulls()
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                var go = new GameObject("Seagull");
+                go.transform.SetParent(transform, false);
+                var gull = go.AddComponent<Seagull>();
+                gull.Init(GameBoot.I, Vector3.zero, i * Mathf.PI);
+            }
+        }
+
+        private void BuildLavaVent(Transform island, float radius, float height, int seed)
+        {            float h = MeshGen.IslandHeight(radius, height, -4f, -4f, seed);
+            var vent = new GameObject("Lava Vent");
+            vent.transform.SetParent(island, false);
+            vent.transform.localPosition = new Vector3(-4f, h, -4f);
+
+            var pool = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Destroy(pool.GetComponent<Collider>());
+            pool.transform.SetParent(vent.transform, false);
+            pool.transform.localPosition = new Vector3(0f, 0.1f, 0f);
+            pool.transform.localScale = new Vector3(2.6f, 0.25f, 2.6f);
+            pool.GetComponent<MeshRenderer>().sharedMaterial = MakeMat("lava", new Color32(0xFF, 0x5A, 0x1E, 0xFF), 0.2f);
+            pool.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+            var col = vent.AddComponent<BoxCollider>();
+            col.center = new Vector3(0f, 0.6f, 0f);
+            col.size = new Vector3(3.2f, 1.6f, 3.2f);
+            col.isTrigger = true;
+            var interact = vent.AddComponent<Interactable>();
+            interact.prompt = "E   Cook fish at the lava";
+            interact.onInteract = () => GameBoot.I.CookAll(true);
+            AddLabel(vent.transform, new Vector3(0f, 1.2f, 0f), "LAVA COOK", 34, 0.04f, Palette.Cream, new Vector3(0f, 180f, 0f));
         }
 
         private void BuildDock()

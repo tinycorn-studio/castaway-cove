@@ -14,6 +14,7 @@ namespace Cove
         public float maxKg;
         public float weight;
         public string color;
+        public int minIsland = 1;
     }
 
     [Serializable]
@@ -31,6 +32,9 @@ namespace Cove
         public int value;
         public int baseValue;
         public bool rareVariant;
+        public bool drip;
+        public bool cooked;
+        public bool burned;
         public string color;
         public string killBonus;
     }
@@ -58,7 +62,20 @@ namespace Cove
         public int earnedTotal;
         public bool island2;
         public bool island3;
+        public bool island4;
+        public bool island5;
         public bool catchQuestDone;
+        public bool boatKeys;
+        public bool radarOwned;
+        public bool piranhaKilled;
+        public bool pufferKilled;
+        public bool albatrossKilled;
+        public bool whaleKilled;
+        public List<string> discovered = new List<string>();
+        public List<string> achievements = new List<string>();
+        public int skinIndex = -1;
+        public bool hardMode;
+        public int dynamite;
 
         public float hp = 100f;
         public float hunger = 100f;
@@ -84,7 +101,20 @@ namespace Cove
             earnedTotal = 0;
             island2 = false;
             island3 = false;
+            island4 = false;
+            island5 = false;
             catchQuestDone = false;
+            boatKeys = false;
+            radarOwned = false;
+            piranhaKilled = false;
+            pufferKilled = false;
+            albatrossKilled = false;
+            whaleKilled = false;
+            discovered = new List<string>();
+            achievements = new List<string>();
+            skinIndex = -1;
+            hardMode = false;
+            dynamite = 0;
             hp = 100f;
             hunger = 100f;
             kills = 0;
@@ -132,10 +162,13 @@ namespace Cove
         public const int BagUpgradeCapacity = 14;
         public const float RareVariantChance = 0.03f;
         public const int RareVariantMultiplier = 5;
+        public const float DripChance = 0.10f;
+        public const int DripMultiplier = 8;
         public const int PistolAmmoPrice = 12;
         public const int PistolAmmoAmount = 16;
         public const int ShotgunAmmoPrice = 18;
         public const int ShotgunAmmoAmount = 12;
+        public const int DynamitePrice = 30;
 
         public static readonly WeaponDef[] Weapons =
         {
@@ -148,14 +181,14 @@ namespace Cove
         private const string FishJson = @"
 {
   ""species"": [
-    { ""name"": ""Sunny Sardine"",  ""tier"": ""common"",   ""baseValue"": 45,  ""minKg"": 0.2, ""maxKg"": 1.1, ""weight"": 26, ""color"": ""#9BD4A0"" },
-    { ""name"": ""Dune Minnow"",    ""tier"": ""common"",   ""baseValue"": 55,  ""minKg"": 0.3, ""maxKg"": 1.4, ""weight"": 22, ""color"": ""#A8D8A0"" },
-    { ""name"": ""Coral Perch"",    ""tier"": ""common"",   ""baseValue"": 70,  ""minKg"": 0.6, ""maxKg"": 2.6, ""weight"": 18, ""color"": ""#8FCFB0"" },
-    { ""name"": ""Lagoon Snapper"", ""tier"": ""uncommon"", ""baseValue"": 110, ""minKg"": 1.0, ""maxKg"": 4.0, ""weight"": 13, ""color"": ""#6FC3FF"" },
-    { ""name"": ""Amber Tang"",     ""tier"": ""uncommon"", ""baseValue"": 130, ""minKg"": 1.4, ""maxKg"": 5.2, ""weight"": 9,  ""color"": ""#7FB8E8"" },
-    { ""name"": ""Moonray Bass"",   ""tier"": ""rare"",     ""baseValue"": 200, ""minKg"": 2.0, ""maxKg"": 7.5, ""weight"": 5,  ""color"": ""#C79BFF"" },
-    { ""name"": ""Stormback Eel"",  ""tier"": ""rare"",     ""baseValue"": 240, ""minKg"": 2.4, ""maxKg"": 9.0, ""weight"": 3,  ""color"": ""#B08BFF"" },
-    { ""name"": ""Golden Leviathan"",""tier"": ""epic"",     ""baseValue"": 480, ""minKg"": 5.0, ""maxKg"": 18.0,""weight"": 2,  ""color"": ""#FFC24B"" }
+    { ""name"": ""Sunny Sardine"",  ""tier"": ""common"",   ""baseValue"": 45,  ""minKg"": 0.2, ""maxKg"": 1.1, ""weight"": 26, ""color"": ""#9BD4A0"", ""minIsland"": 1 },
+    { ""name"": ""Dune Minnow"",    ""tier"": ""common"",   ""baseValue"": 55,  ""minKg"": 0.3, ""maxKg"": 1.4, ""weight"": 22, ""color"": ""#A8D8A0"", ""minIsland"": 1 },
+    { ""name"": ""Coral Perch"",    ""tier"": ""common"",   ""baseValue"": 70,  ""minKg"": 0.6, ""maxKg"": 2.6, ""weight"": 18, ""color"": ""#8FCFB0"", ""minIsland"": 2 },
+    { ""name"": ""Lagoon Snapper"", ""tier"": ""uncommon"", ""baseValue"": 110, ""minKg"": 1.0, ""maxKg"": 4.0, ""weight"": 13, ""color"": ""#6FC3FF"", ""minIsland"": 3 },
+    { ""name"": ""Amber Tang"",     ""tier"": ""uncommon"", ""baseValue"": 130, ""minKg"": 1.4, ""maxKg"": 5.2, ""weight"": 9,  ""color"": ""#7FB8E8"", ""minIsland"": 3 },
+    { ""name"": ""Moonray Bass"",   ""tier"": ""rare"",     ""baseValue"": 200, ""minKg"": 2.0, ""maxKg"": 7.5, ""weight"": 5,  ""color"": ""#C79BFF"", ""minIsland"": 4 },
+    { ""name"": ""Stormback Eel"",  ""tier"": ""rare"",     ""baseValue"": 240, ""minKg"": 2.4, ""maxKg"": 9.0, ""weight"": 3,  ""color"": ""#B08BFF"", ""minIsland"": 5 },
+    { ""name"": ""Golden Leviathan"",""tier"": ""epic"",     ""baseValue"": 480, ""minKg"": 5.0, ""maxKg"": 18.0,""weight"": 2,  ""color"": ""#FFC24B"", ""minIsland"": 5 }
   ]
 }";
 
@@ -192,12 +225,13 @@ namespace Cove
             return TierLabel(tier).ToUpperInvariant();
         }
 
-        public static CaughtFish RollFish(System.Random rng, bool baitUsed)
+        public static CaughtFish RollFish(System.Random rng, bool baitUsed, int island = 5)
         {
             float[] weights = new float[Species.Length];
             float total = 0f;
             for (int i = 0; i < Species.Length; i++)
             {
+                if (Species[i].minIsland > island) { weights[i] = 0f; continue; }
                 float w = Species[i].weight;
                 if (baitUsed)
                 {
@@ -209,21 +243,32 @@ namespace Cove
                 weights[i] = w;
                 total += w;
             }
+            if (total <= 0f)
+            {
+                for (int i = 0; i < Species.Length; i++)
+                {
+                    weights[i] = Species[i].weight;
+                    total += weights[i];
+                }
+            }
 
             float pick = (float)rng.NextDouble() * total;
-            FishSpecies sp = Species[0];
+            FishSpecies sp = null;
             for (int i = 0; i < Species.Length; i++)
             {
                 pick -= weights[i];
-                if (pick <= 0f) { sp = Species[i]; break; }
+                if (pick <= 0f && weights[i] > 0f) { sp = Species[i]; break; }
             }
+            if (sp == null) sp = Species[0];
 
             float t = (float)rng.NextDouble();
             float weightKg = Mathf.Lerp(sp.minKg, sp.maxKg, t);
             float sizeFactor = Mathf.Lerp(0.8f, 1.5f, t);
             bool rare = rng.NextDouble() < RareVariantChance;
+            bool drip = !rare && rng.NextDouble() < DripChance;
             int value = Mathf.Max(5, Mathf.RoundToInt(sp.baseValue * sizeFactor));
             if (rare) value *= RareVariantMultiplier;
+            if (drip) value *= DripMultiplier;
 
             return new CaughtFish
             {
@@ -233,7 +278,8 @@ namespace Cove
                 value = value,
                 baseValue = value,
                 rareVariant = rare,
-                color = sp.color,
+                drip = drip,
+                color = drip ? "#FF5FC8" : sp.color,
             };
         }
 

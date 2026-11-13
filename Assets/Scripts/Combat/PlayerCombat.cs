@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Cove
@@ -11,6 +12,7 @@ namespace Cove
 
         private GameObject weaponRoot;
         private GameObject[] weaponVisuals = new GameObject[4];
+        private readonly List<Renderer> weaponParts = new List<Renderer>();
         private float nextAttack;
         private float invuln;
         private float hudTimer;
@@ -23,6 +25,7 @@ namespace Cove
         private void Start()
         {
             BuildWeaponVisuals();
+            if (State != null && State.skinIndex > 0) ApplySkin(State.skinIndex);
             RefreshWeaponVisual();
         }
 
@@ -74,6 +77,7 @@ namespace Cove
             if (Input.GetKeyDown(KeyCode.Alpha4)) EquipWeapon(3);
             if (Input.GetKeyDown(KeyCode.R)) StartReload();
             if (Input.GetKeyDown(KeyCode.F)) EatFish();
+            if (Input.GetKeyDown(KeyCode.Alpha5)) ThrowDynamite();
 
             if (game.Fishing == null || game.Fishing.RodEquipped) return;
             if (game.Fishing.State != FishingState.Idle) return;
@@ -247,6 +251,8 @@ namespace Cove
                     var t = chosen.collider.GetComponentInParent<CombatTarget>();
                     if (t != null && !t.IsDead)
                     {
+                        var fishTarget = t as FishEnemy;
+                        if (fishTarget != null) fishTarget.LastHitLongshot = nearest > 18f;
                         t.TakeDamage(def.damage, t.IsHeadshot(chosen.point), false, t.IsAirborne, chosen.point);
                         if (Audio != null) Audio.Play(Audio.Hit, 0.5f, 1.2f);
                         break;
@@ -310,8 +316,8 @@ namespace Cove
         public string WeaponHudText()
         {
             var def = GameData.Weapons[State.weaponIndex];
-            if (def.melee) return def.name;
-            return def.name + "  " + GetMag(State.weaponIndex) + " / " + GetReserve(State.weaponIndex);
+            string text = def.melee ? def.name : def.name + "  " + GetMag(State.weaponIndex) + " / " + GetReserve(State.weaponIndex);
+            return text + "   ·   Dyn " + State.dynamite;
         }
 
         public void TakeDamage(int amount)
@@ -359,6 +365,28 @@ namespace Cove
             invuln = 2f;
             if (game.Fishing != null) game.Fishing.CancelFishing(false);
         }
+        private void ThrowDynamite()
+        {
+            if (State.dynamite <= 0)
+            {
+                if (GameBoot.I.UI != null) GameBoot.I.UI.Toast("No dynamite. Buy some at the weapon rack.");
+                return;
+            }
+            State.dynamite--;
+            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Destroy(go.GetComponent<Collider>());
+            go.name = "Dynamite";
+            go.transform.position = Cam.transform.position + Cam.transform.forward * 0.7f;
+            go.transform.localScale = Vector3.one * 0.2f;
+            go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("dynamite", new Color32(0xB8, 0x2A, 0x2A, 0xFF), 0.3f);
+            var rb = go.AddComponent<Rigidbody>();
+            rb.velocity = Cam.transform.forward * 9f + Vector3.up * 4f;
+            var stick = go.AddComponent<DynamiteStick>();
+            stick.Init(GameBoot.I, 1.6f);
+            if (Audio != null) Audio.Play(Audio.Click, 0.5f, 1.3f);
+            if (GameBoot.I.UI != null) GameBoot.I.UI.Toast("Dynamite out!");
+            if (GameBoot.I.UI != null) GameBoot.I.UI.RefreshHud();
+        }
 
         public void EatFish()
         {
@@ -371,8 +399,10 @@ namespace Cove
             int idx = State.bag.Count - 1;
             CaughtFish f = State.bag[idx];
             State.bag.RemoveAt(idx);
-            State.hp = Mathf.Min(100f, State.hp + 18f + Mathf.Min(20f, f.value * 0.02f));
-            State.hunger = Mathf.Min(100f, State.hunger + 28f);
+            float heal = f.cooked && !f.burned ? 30f : f.burned ? 8f : 18f;
+            float food = f.cooked && !f.burned ? 40f : f.burned ? 10f : 28f;
+            State.hp = Mathf.Min(100f, State.hp + heal + Mathf.Min(20f, f.value * 0.02f));
+            State.hunger = Mathf.Min(100f, State.hunger + food);
             if (Audio != null) Audio.Play(Audio.Buy, 0.6f, 1.1f);
             if (game.UI != null)
             {
@@ -489,7 +519,25 @@ namespace Cove
             go.transform.localPosition = pos;
             go.transform.localScale = scale;
             go.transform.localRotation = Quaternion.Euler(euler);
-            go.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("weaponPart", color, 0.35f);
+            var renderer = go.GetComponent<MeshRenderer>();
+            renderer.sharedMaterial = WorldBuilder.MakeMat("weaponPart", color, 0.35f);
+            weaponParts.Add(renderer);
+        }
+
+        public void ApplySkin(int index)
+        {
+            Color c;
+            if (index == 1) c = new Color32(0xFF, 0x7A, 0x59, 0xFF);
+            else if (index == 2) c = new Color32(0x3A, 0x5A, 0x8C, 0xFF);
+            else if (index == 3) c = new Color32(0xF2, 0xB2, 0x3E, 0xFF);
+            else if (index == 4) c = new Color32(0x6F, 0xD9, 0xB0, 0xFF);
+            else return;
+            for (int i = 0; i < weaponParts.Count; i++)
+            {
+                if (weaponParts[i] == null) continue;
+                var mat = weaponParts[i].material;
+                if (mat != null && mat.HasProperty("_Color")) mat.SetColor("_Color", c);
+            }
         }
 
         public void RefreshWeaponVisual()

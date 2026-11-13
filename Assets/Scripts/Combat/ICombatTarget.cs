@@ -38,6 +38,7 @@ namespace Cove
             {
                 var t = Targets[i];
                 if (t == null || t.IsDead) continue;
+                if (Mathf.Abs(t.transform.position.y - from.y) > 8f) continue;
                 Vector3 to = t.transform.position - from;
                 float d = to.magnitude;
                 if (d > maxDistance) continue;

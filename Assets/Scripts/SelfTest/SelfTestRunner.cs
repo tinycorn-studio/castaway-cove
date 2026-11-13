@@ -299,6 +299,60 @@ namespace Cove
             ms = sw.ElapsedMilliseconds;
             Add("boss", bossOk, bossOk ? "killed the Spider Crab, collected its shell, earned $300 and opened Isle Two" : "bossSpawned=" + bossSpawnedOk + " killed=" + game.State.bossKilled + " island2=" + game.State.island2 + " money=" + game.State.money, (long)ms);
 
+            sw = Stopwatch.StartNew();
+            bool chainOk = true;
+            string chainDetail = "";
+            for (int type = 1; type <= 4; type++)
+            {
+                game.TrySpawnIslandBoss(type);
+                var islandBoss = game.ActiveIslandBoss;
+                if (islandBoss == null)
+                {
+                    chainOk = false;
+                    chainDetail += "boss " + type + " did not spawn; ";
+                    continue;
+                }
+                islandBoss.TakeDamage(islandBoss.MaxHp, false, false, false, islandBoss.transform.position);
+                yield return Wait(0.08f);
+                var trophy = game.BossTrophy;
+                if (trophy != null)
+                {
+                    var trophyInteract = trophy.GetComponent<Interactable>();
+                    if (trophyInteract != null) trophyInteract.Interact();
+                }
+                yield return Wait(0.08f);
+                if (!game.IslandBossDefeated(type))
+                {
+                    chainOk = false;
+                    chainDetail += "boss " + type + " not defeated; ";
+                }
+            }
+            bool chainUnlocks = game.State.island3 && game.State.island4 && game.State.island5 && game.State.whaleKilled;
+            chainOk = chainOk && chainUnlocks;
+            if (!chainUnlocks) chainDetail += "islands=(3:" + game.State.island3 + " 4:" + game.State.island4 + " 5:" + game.State.island5 + " whale:" + game.State.whaleKilled + ")";
+            ms = sw.ElapsedMilliseconds;
+            Add("bosses", chainOk, chainOk ? "defeated Piranha, Pufferfish, Albatross and Whale; Isles 3, 4 and 5 opened" : chainDetail, (long)ms);
+
+            sw = Stopwatch.StartNew();
+            game.State.bag.Add(new CaughtFish { species = "Test Cook", tier = "common", weight = 1f, value = 100, baseValue = 100 });
+            game.CookAll(true);
+            bool cookOk = game.State.bag.Count == 1 && game.State.bag[0].value == 150 && game.State.bag[0].cooked;
+            game.SellAll();
+            int skinBefore = game.State.skinIndex;
+            int moneyBeforeServices = game.State.money;
+            game.SpinGacha();
+            bool gachaOk = game.State.skinIndex >= 0 && game.State.skinIndex != skinBefore && game.State.money == moneyBeforeServices - 100;
+            game.BuyDynamite();
+            bool dynamiteOk = game.State.dynamite == 1;
+            bool difficultyBefore = game.State.hardMode;
+            game.ToggleDifficulty();
+            bool difficultyOk = game.State.hardMode != difficultyBefore;
+            game.ToggleDifficulty();
+            bool fishipediaOk = game.State.discovered != null && game.State.discovered.Contains("Sunny Sardine");
+            bool servicesOk = cookOk && gachaOk && dynamiteOk && difficultyOk && fishipediaOk;
+            ms = sw.ElapsedMilliseconds;
+            Add("services", servicesOk, servicesOk ? "cooked a fish for 1.5x, spun a skin, bought dynamite, toggled difficulty and logged the Fishipedia" : "cook=" + cookOk + " gacha=" + gachaOk + " dynamite=" + dynamiteOk + " difficulty=" + difficultyOk + " fishipedia=" + fishipediaOk, (long)ms);
+
             result.finalMoney = game.State.money;
             result.bagCount = game.State.bag.Count;
             bool allOk = true;

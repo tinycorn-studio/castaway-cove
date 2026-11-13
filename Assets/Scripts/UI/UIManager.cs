@@ -19,10 +19,13 @@ namespace Cove
         public bool ShopOpen { get; private set; }
         public bool QuestOpen { get; private set; }
         public bool WeaponOpen { get; private set; }
+        public bool GrillOpen { get; private set; }
+        public bool FishipediaOpen { get; private set; }
+        public bool FortuneOpen { get; private set; }
 
         public bool AnyPanelOpen
         {
-            get { return MenuOpen || Paused || ShopOpen || QuestOpen || WeaponOpen; }
+            get { return MenuOpen || Paused || ShopOpen || QuestOpen || WeaponOpen || GrillOpen || FishipediaOpen || FortuneOpen; }
         }
 
         public Text MoneyText;
@@ -55,11 +58,19 @@ namespace Cove
         public GameObject ModalDim;
         public Text MenuMoneyHint;
         public Button ContinueButton;
+        public Button DifficultyButton;
 
         public GameObject PausePanel;
         public GameObject ShopPanel;
         public GameObject QuestPanel;
         public GameObject WeaponPanel;
+        public GameObject GrillPanel;
+        public Text GrillText;
+        public GameObject FishipediaPanel;
+        public Text FishipediaText;
+        public Text AchievementsText;
+        public GameObject FortunePanel;
+        public Text FortuneText;
 
         public Text ShopMoneyText;
         public Text BaitItemDesc;
@@ -87,6 +98,9 @@ namespace Cove
         public Button PistolAmmoButton;
         public Text ShotgunAmmoDesc;
         public Button ShotgunAmmoButton;
+        public Text DynamiteDesc;
+        public Button DynamiteButton;
+        public Button LavaCookButton;
 
         private class ShopRowUI
         {
@@ -107,9 +121,18 @@ namespace Cove
         public Text Quest2Progress;
         public Text Quest3Title;
         public Text Quest3Progress;
+        public Text Quest4Title;
+        public Text Quest4Progress;
+        public Text Quest5Title;
+        public Text Quest5Progress;
         public Image Quest1Chip;
         public Image Quest2Chip;
         public Image Quest3Chip;
+        public Image Quest4Chip;
+        public Image Quest5Chip;
+
+        public GameObject RadarPanel;
+        public Text RadarText;
 
         public Text WorldStatus;
 
@@ -195,7 +218,7 @@ namespace Cove
             var weaponChip = MakePanel(root, "Weapon Chip", new Color(1f, 0.96f, 0.87f, 0.94f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-22f, -92f), new Vector2(238f, 40f), true);
             WeaponText = MakeText(weaponChip, "Fists", 15, Palette.Ink, TextAnchor.MiddleRight, false, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-14f, 0f), new Vector2(220f, 30f));
 
-            var hint = MakeText(root, "WASD move  ·  Shift sprint  ·  1 rod  ·  2 melee  ·  3 pistol  ·  4 shotgun  ·  R reload  ·  F eat  ·  E interact  ·  Esc pause",
+            var hint = MakeText(root, "WASD move  ·  Shift sprint  ·  1 rod  ·  2 melee  ·  3 pistol  ·  4 shotgun  ·  5 dynamite  ·  R reload  ·  F eat  ·  E interact  ·  Tab log  ·  Esc pause",
                 13, new Color(1f, 1f, 1f, 0.92f), TextAnchor.LowerLeft, true, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(22f, 16f), new Vector2(980f, 26f));
             hint.horizontalOverflow = HorizontalWrapMode.Overflow;
 
@@ -290,6 +313,13 @@ namespace Cove
 
             WorldStatus = MakeText(root, "", 13, new Color(1f, 1f, 1f, 0.75f), TextAnchor.LowerRight, true, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-22f, 16f), new Vector2(400f, 24f));
 
+            var radar = MakePanel(root, "Radar", new Color(0.09f, 0.2f, 0.24f, 0.62f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-22f, 52f), new Vector2(320f, 150f));
+            RadarPanel = radar.gameObject;
+            MakeText(radar, "RADAR", 12, Palette.Gold, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(14f, -10f), new Vector2(292f, 18f));
+            RadarText = MakeText(radar, "", 12, Palette.Cream, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(14f, -30f), new Vector2(292f, 110f));
+            RadarText.lineSpacing = 1.15f;
+            RadarPanel.SetActive(false);
+
             var damage = new GameObject("Damage Flash", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             damage.transform.SetParent(root, false);
             var damageRt = damage.GetComponent<RectTransform>();
@@ -380,8 +410,11 @@ namespace Cove
             var quitRt = quit.GetComponent<RectTransform>();
             UITheme.Place(quitRt, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -334f), new Vector2(330f, 58f));
 
-            MenuMoneyHint = MakeText(panel, "", 14, new Color(0.36f, 0.44f, 0.47f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -414f), new Vector2(440f, 40f));
-            MakeText(panel, "WASD move  |  mouse look  |  E interact\n1 rod  |  2/3/4 weapons  |  LMB attack/cast  |  R reload  |  F eat", 14, new Color(0.36f, 0.44f, 0.47f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(44f, 40f), new Vector2(450f, 56f));
+            DifficultyButton = UITheme.Button(panel, "Difficulty: Normal", () => GameBoot.I.ToggleDifficulty(), new Color(0.93f, 0.85f, 0.68f, 1f), Palette.Ink, 16);
+            UITheme.Place(DifficultyButton.GetComponent<RectTransform>(), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -408f), new Vector2(330f, 42f));
+
+            MenuMoneyHint = MakeText(panel, "", 14, new Color(0.36f, 0.44f, 0.47f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -466f), new Vector2(440f, 40f));
+            MakeText(panel, "WASD move  |  mouse look  |  E interact\n1 rod  |  2/3/4 weapons  |  5 dynamite  |  LMB attack/cast  |  R reload  |  F eat  |  Tab log", 14, new Color(0.36f, 0.44f, 0.47f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(44f, 16f), new Vector2(500f, 56f));
             MakeText(root, "v1.0  ·  offline single player", 12, new Color(1f, 1f, 1f, 0.65f), TextAnchor.UpperRight, true, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-22f, -140f), new Vector2(300f, 20f));
             MenuPanel.SetActive(false);
         }
@@ -402,6 +435,9 @@ namespace Cove
             BuildShop(root);
             BuildQuests(root);
             BuildWeapons(root);
+            BuildGrill(root);
+            BuildFishipedia(root);
+            BuildFortune(root);
             ModalDim.SetActive(false);
         }
 
@@ -485,8 +521,7 @@ namespace Cove
         }
 
         private void BuildWeapons(Transform root)
-        {
-            var panel = MakePanel(root, "Weapon Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(700f, 620f), true);
+        {            var panel = MakePanel(root, "Weapon Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(700f, 620f), true);
             WeaponPanel = panel.gameObject;
 
             MakeText(panel, "WEAPON RACK", 30, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -26f), new Vector2(300f, 40f)).fontStyle = FontStyle.Bold;
@@ -508,14 +543,68 @@ namespace Cove
             var shotgunAmmo = BuildShopRow(panel, -434f, "Shotgun Shells", () => GameBoot.I.BuyAmmo(3));
             ShotgunAmmoDesc = shotgunAmmo.desc;
             ShotgunAmmoButton = shotgunAmmo.buy;
+            var dynamite = BuildShopRow(panel, -512f, "Dynamite", () => GameBoot.I.BuyDynamite());
+            DynamiteDesc = dynamite.desc;
+            DynamiteButton = dynamite.buy;
 
             MakeText(panel, "Buying weapons and ammo saves your progress automatically.", 12, new Color(0.45f, 0.5f, 0.52f, 1f), TextAnchor.LowerCenter, false, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 18f), new Vector2(500f, 20f));
             WeaponPanel.SetActive(false);
         }
 
+        private void BuildGrill(Transform root)
+        {
+            var panel = MakePanel(root, "Grill Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(620f, 420f), true);
+            GrillPanel = panel.gameObject;
+            MakeText(panel, "GRILL", 30, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -26f), new Vector2(300f, 40f)).fontStyle = FontStyle.Bold;
+            var close = UITheme.Button(panel, "Close", () => GameBoot.I.CloseGrill(), new Color(0.85f, 0.8f, 0.7f, 1f), Palette.Ink, 14);
+            var closeRt = close.GetComponent<RectTransform>();
+            UITheme.Place(closeRt, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-26f, -24f), new Vector2(78f, 34f));
+            MakeText(panel, "Cooking raises a fish's value by 1.5x. There is a 15% chance to burn it down to 10% value. Cooked fish heal more when eaten.", 14, new Color(0.4f, 0.47f, 0.5f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -78f), new Vector2(550f, 60f));
+            GrillText = MakeText(panel, "", 15, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -156f), new Vector2(550f, 80f));
+            var cook = UITheme.Button(panel, "Cook all fish", () => GameBoot.I.CookAll(false), Palette.Teal, Palette.Cream, 16);
+            UITheme.Place(cook.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-130f, 70f), new Vector2(240f, 46f));
+            LavaCookButton = UITheme.Button(panel, "Lava cook (safe)", () => GameBoot.I.CookAll(true), new Color(0.93f, 0.55f, 0.25f, 1f), Palette.Cream, 14);
+            UITheme.Place(LavaCookButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(130f, 70f), new Vector2(220f, 46f));
+            MakeText(panel, "The lava vent is on Isle Five.", 12, new Color(0.45f, 0.5f, 0.52f, 1f), TextAnchor.LowerCenter, false, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 22f), new Vector2(500f, 20f));
+            GrillPanel.SetActive(false);
+        }
+
+        private void BuildFishipedia(Transform root)
+        {
+            var panel = MakePanel(root, "Fishipedia Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(680f, 620f), true);
+            FishipediaPanel = panel.gameObject;
+            MakeText(panel, "FISHIPEDIA", 30, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -26f), new Vector2(300f, 40f)).fontStyle = FontStyle.Bold;
+            MakeText(panel, "Every catch is logged here. Drip variants are the bright pink rarities.", 13, Palette.Teal, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -66f), new Vector2(600f, 22f));
+            var close = UITheme.Button(panel, "Close", () => GameBoot.I.CloseFishipedia(), new Color(0.85f, 0.8f, 0.7f, 1f), Palette.Ink, 14);
+            UITheme.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-26f, -24f), new Vector2(78f, 34f));
+            FishipediaText = MakeText(panel, "", 14, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -102f), new Vector2(610f, 300f));
+            FishipediaText.lineSpacing = 1.1f;
+            MakeText(panel, "ACHIEVEMENTS", 16, Palette.Teal, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -404f), new Vector2(300f, 22f)).fontStyle = FontStyle.Bold;
+            AchievementsText = MakeText(panel, "", 13, new Color(0.36f, 0.43f, 0.46f, 1f), TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -432f), new Vector2(610f, 150f));
+            FishipediaPanel.SetActive(false);
+        }
+
+        private void BuildFortune(Transform root)
+        {
+            var panel = MakePanel(root, "Fortune Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 460f), true);
+            FortunePanel = panel.gameObject;
+            MakeText(panel, "REEL OF FORTUNE", 30, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -26f), new Vector2(400f, 40f)).fontStyle = FontStyle.Bold;
+            var close = UITheme.Button(panel, "Close", () => GameBoot.I.CloseFortune(), new Color(0.85f, 0.8f, 0.7f, 1f), Palette.Ink, 14);
+            UITheme.Place(close.GetComponent<RectTransform>(), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-26f, -24f), new Vector2(78f, 34f));
+            FortuneText = MakeText(panel, "", 14, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -82f), new Vector2(570f, 130f));
+            var gacha = UITheme.Button(panel, "Gacha spin (Drip / $100)", () => GameBoot.I.SpinGacha(), Palette.Teal, Palette.Cream, 15);
+            UITheme.Place(gacha.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 174f), new Vector2(360f, 44f));
+            var roulette = UITheme.Button(panel, "Roulette ($50)", () => GameBoot.I.PlayRoulette(), new Color(0.85f, 0.72f, 0.5f, 1f), Palette.Ink, 15);
+            UITheme.Place(roulette.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-100f, 116f), new Vector2(200f, 44f));
+            var slots = UITheme.Button(panel, "Slots ($25)", () => GameBoot.I.PlaySlots(), new Color(0.85f, 0.72f, 0.5f, 1f), Palette.Ink, 15);
+            UITheme.Place(slots.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(100f, 116f), new Vector2(200f, 44f));
+            MakeText(panel, "Drip fish are consumed by the gacha. The casino uses in-game money only.", 12, new Color(0.45f, 0.5f, 0.52f, 1f), TextAnchor.LowerCenter, false, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 26f), new Vector2(560f, 20f));
+            FortunePanel.SetActive(false);
+        }
+
         private void BuildQuests(Transform root)
         {
-            var panel = MakePanel(root, "Quest Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, 560f), true);
+            var panel = MakePanel(root, "Quest Panel", new Color(1f, 0.965f, 0.89f, 0.99f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(640f, 660f), true);
             QuestPanel = panel.gameObject;
 
             MakeText(panel, "ISLAND QUESTS", 30, Palette.Ink, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -28f), new Vector2(360f, 40f)).fontStyle = FontStyle.Bold;
@@ -525,11 +614,13 @@ namespace Cove
 
             QuestSummary = MakeText(panel, "", 14, Palette.Teal, TextAnchor.UpperLeft, false, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(32f, -76f), new Vector2(520f, 22f));
 
-            BuildQuestRow(panel, -110f, "1", out Quest1Title, out Quest1Progress, out Quest1Chip);
-            BuildQuestRow(panel, -216f, "2", out Quest2Title, out Quest2Progress, out Quest2Chip);
-            BuildQuestRow(panel, -322f, "3", out Quest3Title, out Quest3Progress, out Quest3Chip);
+            BuildQuestRow(panel, -96f, "1", out Quest1Title, out Quest1Progress, out Quest1Chip);
+            BuildQuestRow(panel, -188f, "2", out Quest2Title, out Quest2Progress, out Quest2Chip);
+            BuildQuestRow(panel, -280f, "3", out Quest3Title, out Quest3Progress, out Quest3Chip);
+            BuildQuestRow(panel, -372f, "4", out Quest4Title, out Quest4Progress, out Quest4Chip);
+            BuildQuestRow(panel, -464f, "5", out Quest5Title, out Quest5Progress, out Quest5Chip);
 
-            MakeText(panel, "Complete quests to open the two far islands.\nRow the boat from the dock to explore them.", 13, new Color(0.4f, 0.47f, 0.5f, 1f), TextAnchor.LowerCenter, false, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 46f), new Vector2(520f, 40f));
+            MakeText(panel, "Defeat each island boss, collect its trophy and hand it in to open the next island.", 13, new Color(0.4f, 0.47f, 0.5f, 1f), TextAnchor.LowerCenter, false, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 30f), new Vector2(560f, 34f));
             QuestPanel.SetActive(false);
         }
 
@@ -573,6 +664,9 @@ namespace Cove
             SetVitals(g.hp, 100f, g.hunger, 100f);
             RefreshShopRows();
             RefreshWeaponRows();
+            if (GrillPanel != null && GrillPanel.activeSelf) RefreshGrill();
+            if (FishipediaPanel != null && FishipediaPanel.activeSelf) RefreshFishipedia();
+            if (FortunePanel != null && FortunePanel.activeSelf) RefreshFortune();
             if (QuestPanel != null && QuestPanel.activeSelf) RefreshQuests();
         }
 
@@ -692,7 +786,16 @@ namespace Cove
             if (tierBg != null) tierBg.GetComponent<Image>().color = GameData.TierColor(fish.tier);
             CatchWeight.text = fish.weight.ToString("0.0") + " kg";
             CatchValue.text = GameData.Money(fish.value);
-            CatchRare.gameObject.SetActive(fish.rareVariant);
+            if (fish.drip)
+            {
+                CatchRare.text = "DRIP VARIANT  ·  8x VALUE";
+                CatchRare.gameObject.SetActive(true);
+            }
+            else
+            {
+                CatchRare.text = "RARE VARIANT  ·  5x VALUE";
+                CatchRare.gameObject.SetActive(fish.rareVariant);
+            }
             CatchFooter.text = stored ? "Added to your bag" : "Still alive — finish it with a weapon";
             if (!string.IsNullOrEmpty(fish.killBonus)) CatchFooter.text += "  ·  " + fish.killBonus;
             if (catchRoutine != null) StopCoroutine(catchRoutine);
@@ -730,7 +833,16 @@ namespace Cove
                 var txt = ContinueButton.GetComponentInChildren<Text>();
                 if (txt != null) txt.text = hasSave ? "Continue" : "Continue (no save)";
             }
+            RefreshDifficulty();
             if (show) SetPrompt("");
+        }
+
+        public void RefreshDifficulty()
+        {
+            if (DifficultyButton == null) return;
+            var txt = DifficultyButton.GetComponentInChildren<Text>();
+            bool hard = GameBoot.I != null && GameBoot.I.State != null && GameBoot.I.State.hardMode;
+            if (txt != null) txt.text = "Difficulty: " + (hard ? "Hard" : "Normal");
         }
 
         public void ShowPause(bool show)
@@ -756,6 +868,12 @@ namespace Cove
             if (show) RefreshQuests();
         }
 
+        public void SetRadar(bool show, string text)
+        {
+            if (RadarPanel != null) RadarPanel.SetActive(show);
+            if (RadarText != null && show) RadarText.text = text;
+        }
+
         public void ShowWeapons(bool show)
         {
             WeaponOpen = show;
@@ -764,9 +882,89 @@ namespace Cove
             if (show) RefreshHud();
         }
 
+        public void ShowGrill(bool show)
+        {
+            GrillOpen = show;
+            if (GrillPanel != null) GrillPanel.SetActive(show);
+            RefreshModalDim();
+            if (show) RefreshGrill();
+        }
+
+        public void RefreshGrill()
+        {
+            var g = GameBoot.I != null ? GameBoot.I.State : null;
+            if (g == null || GrillText == null) return;
+            int raw = 0;
+            int cooked = 0;
+            for (int i = 0; i < g.bag.Count; i++)
+            {
+                if (g.bag[i].cooked) cooked++;
+                else raw++;
+            }
+            GrillText.text = "Bag: " + raw + " raw fish, " + cooked + " cooked.\nRaw value total: " + GameData.Money(BagValue(false)) + "\nCooked value total: " + GameData.Money(BagValue(true));
+            if (LavaCookButton != null) LavaCookButton.gameObject.SetActive(g.island5);
+        }
+
+        public void ShowFishipedia(bool show)
+        {
+            FishipediaOpen = show;
+            if (FishipediaPanel != null) FishipediaPanel.SetActive(show);
+            RefreshModalDim();
+            if (show) RefreshFishipedia();
+        }
+
+        public void RefreshFishipedia()
+        {
+            var g = GameBoot.I != null ? GameBoot.I.State : null;
+            if (g == null) return;
+            var sb = new System.Text.StringBuilder();
+            for (int i = 0; i < GameData.Species.Length; i++)
+            {
+                var sp = GameData.Species[i];
+                bool found = g.discovered != null && g.discovered.Contains(sp.name);
+                sb.AppendLine((found ? "[x] " : "[ ] ") + (found ? sp.name : "???") + "   " + GameData.TierLabel(sp.tier));
+            }
+            if (FishipediaText != null) FishipediaText.text = sb.ToString();
+            if (AchievementsText != null)
+            {
+                if (g.achievements == null || g.achievements.Count == 0) AchievementsText.text = "No achievements yet.";
+                else AchievementsText.text = string.Join("   ·   ", g.achievements.ToArray());
+            }
+        }
+
+        public void ShowFortune(bool show)
+        {
+            FortuneOpen = show;
+            if (FortunePanel != null) FortunePanel.SetActive(show);
+            RefreshModalDim();
+            if (show) RefreshFortune();
+        }
+
+        public void RefreshFortune()
+        {
+            var g = GameBoot.I != null ? GameBoot.I.State : null;
+            if (g == null || FortuneText == null) return;
+            int drip = 0;
+            for (int i = 0; i < g.bag.Count; i++) if (g.bag[i].drip) drip++;
+            FortuneText.text = "Money: " + GameData.Money(g.money) + "\nDrip fish in bag: " + drip + "\nCurrent skin: " + GameBoot.SkinName(g.skinIndex);
+        }
+
+        private int BagValue(bool cookedOnly)
+        {
+            var g = GameBoot.I != null ? GameBoot.I.State : null;
+            if (g == null) return 0;
+            int total = 0;
+            for (int i = 0; i < g.bag.Count; i++)
+            {
+                if (cookedOnly && !g.bag[i].cooked) continue;
+                total += g.bag[i].value;
+            }
+            return total;
+        }
+
         private void RefreshModalDim()
         {
-            if (ModalDim != null) ModalDim.SetActive(Paused || ShopOpen || QuestOpen || WeaponOpen);
+            if (ModalDim != null) ModalDim.SetActive(Paused || ShopOpen || QuestOpen || WeaponOpen || GrillOpen || FishipediaOpen || FortuneOpen);
         }
 
         public void SetVitals(float hp, float maxHp, float hunger, float maxHunger)
@@ -967,32 +1165,51 @@ namespace Cove
                     if (lbl != null) lbl.text = "Buy · " + GameData.Money(GameData.ShotgunAmmoPrice);
                 }
             }
+            if (DynamiteDesc != null)
+            {
+                DynamiteDesc.text = "Throwable · 60 area damage · you have " + g.dynamite + ".";
+                if (DynamiteButton != null)
+                {
+                    DynamiteButton.interactable = g.money >= GameData.DynamitePrice;
+                    var lbl = DynamiteButton.GetComponentInChildren<Text>();
+                    if (lbl != null) lbl.text = "Buy · " + GameData.Money(GameData.DynamitePrice);
+                }
+            }
         }
 
         public void RefreshQuests()
         {
             var g = GameBoot.I != null ? GameBoot.I.State : null;
             if (g == null) return;
-            int fishDone = Mathf.Min(g.kills, 3);
-            bool q1 = g.kills >= 3;
-            bool q2 = g.bossKilled;
-            bool q3 = g.earnedTotal >= 500;
+            bool q1 = g.bossKilled;
+            bool q2 = g.piranhaKilled;
+            bool q3 = g.pufferKilled;
+            bool q4 = g.albatrossKilled;
+            bool q5 = g.whaleKilled;
 
             if (QuestSummary != null)
             {
-                QuestSummary.text = "Lifetime catches " + g.catchCount + "  ·  kills " + g.kills + "  ·  earnings " + GameData.Money(g.earnedTotal);
+                QuestSummary.text = "Catches " + g.catchCount + "  ·  kills " + g.kills + "  ·  earnings " + GameData.Money(g.earnedTotal);
             }
-            if (Quest1Title != null) Quest1Title.text = "Catch and finish 3 creatures";
-            if (Quest1Progress != null) Quest1Progress.text = q1 ? "Complete — the cove knows your name." : fishDone + " / 3 creatures killed";
+            if (Quest1Title != null) Quest1Title.text = "Defeat the Spider Crab";
+            if (Quest1Progress != null) Quest1Progress.text = q1 ? "Complete — boat keys and Isle Two are yours." : "Bait the crab near the shop, dodge its charge, punish the stun.";
             SetQuestChip(Quest1Chip, q1, "DONE");
 
-            if (Quest2Title != null) Quest2Title.text = "Defeat the Spider Crab";
-            if (Quest2Progress != null) Quest2Progress.text = q2 ? "Complete — Isle Two is open." : "Use the crab bait near the shop, dodge the charge, punish the stun.";
-            SetQuestChip(Quest2Chip, q2, "UNLOCKED");
+            if (Quest2Title != null) Quest2Title.text = "Defeat the Giant Piranha (Isle Two)";
+            if (Quest2Progress != null) Quest2Progress.text = q2 ? "Complete — Isle Three is open." : !g.island2 ? "Locked — finish the Spider Crab first." : "Challenge the altar on Isle Two.";
+            SetQuestChip(Quest2Chip, q2, "DONE");
 
-            if (Quest3Title != null) Quest3Title.text = "Earn $500 to unlock Isle Three";
-            if (Quest3Progress != null) Quest3Progress.text = q3 ? "Isle Three is open. The far horizon is yours." : GameData.Money(g.earnedTotal) + " / $500 earned from selling fish";
-            SetQuestChip(Quest3Chip, q3, "UNLOCKED");
+            if (Quest3Title != null) Quest3Title.text = "Defeat the Pufferfish (Isle Three)";
+            if (Quest3Progress != null) Quest3Progress.text = q3 ? "Complete — Isle Four is open." : !g.island3 ? "Locked — finish the Giant Piranha first." : "Challenge the altar on Isle Three.";
+            SetQuestChip(Quest3Chip, q3, "DONE");
+
+            if (Quest4Title != null) Quest4Title.text = "Defeat the Albatross (Isle Four)";
+            if (Quest4Progress != null) Quest4Progress.text = q4 ? "Complete — Isle Five is open." : !g.island4 ? "Locked — finish the Pufferfish first." : "Challenge the altar on Isle Four.";
+            SetQuestChip(Quest4Chip, q4, "DONE");
+
+            if (Quest5Title != null) Quest5Title.text = "Defeat the Mutated Whale (Isle Five)";
+            if (Quest5Progress != null) Quest5Progress.text = q5 ? "Complete — you made it home." : !g.island5 ? "Locked — finish the Albatross first." : "Challenge the altar on Isle Five.";
+            SetQuestChip(Quest5Chip, q5, "DONE");
         }
 
         private void SetQuestChip(Image chip, bool done, string label)

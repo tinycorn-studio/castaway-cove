@@ -14,6 +14,7 @@ namespace Cove
         public bool LastHitHeadshot;
         public bool LastHitMelee;
         public bool LastHitAirborne;
+        public bool LastHitLongshot;
 
         private GameBoot game;
         private Transform visual;
@@ -40,6 +41,12 @@ namespace Cove
             MaxHpValue = Mathf.RoundToInt(baseHp + fish.weight * 1.6f);
             if (fish.rareVariant) MaxHpValue = Mathf.RoundToInt(MaxHpValue * 1.4f);
             HpValue = MaxHpValue;
+            if (g.State.hardMode)
+            {
+                MaxHpValue = Mathf.RoundToInt(MaxHpValue * 1.4f);
+                HpValue = MaxHpValue;
+                ContactDamage = Mathf.RoundToInt(ContactDamage * 1.3f);
+            }
             BuildVisual();
             SnapToGround();
             attackTimer = 1.2f;
@@ -175,6 +182,7 @@ namespace Cove
             LastHitHeadshot = headshot;
             LastHitMelee = melee;
             LastHitAirborne = airborne;
+            if (melee) LastHitLongshot = false;
             if (visual != null) StartCoroutine(Flash());
             if (HpValue <= 0) Die();
         }
@@ -199,6 +207,7 @@ namespace Cove
             if (LastHitHeadshot) { mult += 0.25f; bonusText += "Headshot "; }
             if (LastHitAirborne) { mult += 0.5f; bonusText += "Airborne "; }
             if (LastHitMelee) { mult += 0.05f; bonusText += "Melee "; }
+            if (LastHitLongshot) { mult += 0.3f; bonusText += "Longshot "; }
             if (mult > 1.001f)
             {
                 Fish.value = Mathf.RoundToInt(Fish.value * mult);

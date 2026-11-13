@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &2142452959
+--- !u!1 &2011469540
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -127,8 +127,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2142452961}
-  - component: {fileID: 2142452960}
+  - component: {fileID: 2011469542}
+  - component: {fileID: 2011469541}
   m_Layer: 0
   m_Name: GameBoot
   m_TagString: Untagged
@@ -136,13 +136,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2142452960
+--- !u!114 &2011469541
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2142452959}
+  m_GameObject: {fileID: 2011469540}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9c2e337cb6275bd49a95853c58eaf40a, type: 3}
@@ -158,7 +158,20 @@ MonoBehaviour:
     earnedTotal: 0
     island2: 0
     island3: 0
+    island4: 0
+    island5: 0
     catchQuestDone: 0
+    boatKeys: 0
+    radarOwned: 0
+    piranhaKilled: 0
+    pufferKilled: 0
+    albatrossKilled: 0
+    whaleKilled: 0
+    discovered: []
+    achievements: []
+    skinIndex: -1
+    hardMode: 0
+    dynamite: 0
     hp: 100
     hunger: 100
     kills: 0
@@ -179,20 +192,23 @@ MonoBehaviour:
   Audio: {fileID: 0}
   Boat: {fileID: 0}
   Boss: {fileID: 0}
+  ActiveIslandBoss: {fileID: 0}
   BossShell: {fileID: 0}
+  BossTrophy: {fileID: 0}
+  ActiveIslandBossType: 0
   bossSpawned: 0
   Playing: 0
   Busy: 0
   PlayerObject: {fileID: 0}
   MainCamera: {fileID: 0}
   MainLight: {fileID: 0}
---- !u!4 &2142452961
+--- !u!4 &2011469542
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2142452959}
+  m_GameObject: {fileID: 2011469540}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -205,4 +221,4 @@ Transform:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 2142452961}
+  - {fileID: 2011469542}

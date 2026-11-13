@@ -1,111 +1,94 @@
 # Castaway Cove
 
-A cozy, offline, single-player 3D fishing action game for Windows, built with Unity 6000.6.8f1,
-the built-in render pipeline and built-in uGUI. Islands, terrain, ocean, sky, UI and audio are
-generated in code; the palms, rocks, dock, boat, shop props, NPC and fish use the CC0 Kenney and
-Quaternius packs under `Assets/CC0/` (see `CREDITS.md`). No packages were added and nothing is
-downloaded at build time. The core loop is catch, kill, collect, sell, upgrade and challenge the
-island boss.
+A single-player, offline 3D fishing action game for Windows. Catch fish, finish the living
+catch with weapons, sell it, upgrade gear and fight five bosses across five islands to get
+home. Built with Unity 6000.6.8f1 (built-in pipeline, uGUI); code, UI and audio are original,
+models are CC0 assets from Kenney and Quaternius.
 
-## Open and play in the editor
+## Requirements
 
-1. Open Unity Hub, choose **Add project from disk**, and pick this repository folder.
-2. Unity 6000.6.8f1 opens the project; the first import takes a few minutes.
-3. Open `Assets/Scenes/Main.unity` and press **Play**. The game boots into the title screen.
+- Windows 10/11 x64.
+- Unity 6000.6.8f1 (Unity Hub) to open/build.
+- The built player runs offline with no extra installs.
 
-## Build the Windows player
+## Build / run
 
-From the repository root:
+Open this repository in Unity Hub, open `Assets/Scenes/Main.unity` and press **Play**.
+
+Build the Windows player from the repository root:
 
 ```
-"C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Unity.exe" -batchmode -quit -nographics ^
-  -projectPath . -executeMethod CraftBuild.Build -logFile Logs/build.log
+"C:\Program Files\Unity\Hub\Editor\6000.6.8f1\Editor\Unity.exe" -batchmode -quit -nographics -projectPath . -executeMethod CraftBuild.Build -logFile Logs/build.log
 ```
 
-The player is written to `Build/Game.exe` (Windows x64). The build log ends with
-`BUILD_RESULT=Succeeded`. You can also use **Castaway Cove > Build Player** in the editor.
+The player is written to `Build/Game.exe`. The editor also has **Castaway Cove > Build Player**.
 
-## Play
+## Features
 
-Launch `Build/Game.exe`. On the title screen choose **Play** for a fresh cove, **Continue** to
-load your saved game, or **Quit**. The game runs fully offline.
+- Fishing loop: cast, nibble/bite, hook, tension/stamina reel minigame; rods, bait, bag.
+- Living catch: landed fish have HP, flop/charge and attack; kill them, then collect the carcass.
+- Survival: HP and food, eat fish to heal, knock-out and dock respawn.
+- Weapons: fists, knife, pistol, shotgun and dynamite; ammo, reload, headshot/airborne/melee/longshot bonuses.
+- Five islands and five bosses: Spider Crab, Giant Piranha, Pufferfish, Albatross, Mutated Whale.
+- Quest chain, boat keys and radar; each boss trophy opens the next island.
+- Economy: sell fish, rod/bait/bag shop, Weapon Rack for weapons/ammo/dynamite.
+- Cooking: risky grill (1.5x, burn chance) and safe lava cooking on Isle Five.
+- Collection: 10% Drip variants (8x value), Fishipedia (Tab), achievements.
+- Reel of Fortune gacha, roulette and slots with in-game money.
+- Shootable seagulls, Normal/Hard difficulty, JSON save/load, pause and main menu.
 
 ## Controls
 
 | Action | Key |
 |---|---|
-| Move | W A S D |
-| Look | Mouse |
-| Sprint | Left Shift |
-| Jump | Space |
-| Interact (shop, quest board, boat) | E |
-| Equip / put away fishing rod | 1 |
-| Equip fists or knife | 2 |
-| Equip pistol | 3 |
-| Equip shotgun | 4 |
+| Move / look | WASD / mouse |
+| Sprint / jump | Shift / Space |
+| Interact | E |
+| Rod | 1 |
+| Fists or knife | 2 |
+| Pistol | 3 |
+| Shotgun | 4 |
+| Throw dynamite | 5 |
 | Attack / shoot | Left mouse |
 | Reload | R |
-| Eat a fish (heal health and hunger) | F |
-| Charge a cast | Hold left mouse, release to throw |
-| Hook a bite | Left click while `!! BITE !!` is shown |
-| Reel in | Hold left mouse (watch tension), release to ease |
-| Cancel fishing | Right mouse |
-| Save / Load (manual) | F5 / F9 |
-| Pause / resume | Escape |
+| Eat fish | F |
+| Fishipedia | Tab |
+| Save / load | F5 / F9 |
+| Pause | Escape |
 
-## The loop
+## Structure
 
-- Equip your rod, face open water, hold left mouse to build a cast, and release.
-- Wait for the nibble hint and the bite alert, then click to hook the fish.
-- In the reel minigame, hold left mouse to gain line and progress while keeping the tension bar
-  below the safe marker. Release to let tension fall; if tension reaches the top, the line snaps.
-  Fill the reel bar to land the fish.
-- A landed fish is still alive: it flops toward you and attacks. Use fists (2), the knife, pistol
-  (3) or shotgun (4), hold left mouse to fight, and R to reload. Bring its HP to zero, then press
-  E on the carcass to collect it. Headshots, airborne kills and melee finishers add a kill bonus.
-- Watch your HP and food bars. F eats a fish from your bag to heal and refill food; if food hits
-  zero, HP drains. If you are knocked out, you wake at the dock and lose 10% of your money.
-- Collect fish in your bag, then sell them at the Cove Shop. Use the money at the Weapon Rack next
-  to the shop to buy the knife, pistol, shotgun and ammo, plus better rods, bait and a bigger bag.
-- Read the quest board: kill 3 creatures, defeat the Spider Crab (quest bait and boss are by the
-  shop), and earn $500 to open Isle Three. Beating the Spider Crab and handing in its shell opens
-  Isle Two.
-- Board the rowboat from the dock (E) and row with WASD. You can fish from the boat too.
-- Press Escape for the pause menu (resume, save, load, quit to menu).
+- `Assets/Scripts/Core`: bootstrap, data, save/load, audio, self-test.
+- `Assets/Scripts/Player`, `Fishing`, `Combat`, `UI`, `World`.
+- `Assets/Editor`: CC0 import and player build.
+- `Assets/CC0`: source models/textures and licenses; `Assets/Resources/CC0`: generated prefabs/materials.
+- `shots/`, `test-results/`, `MECHANICS.md`, `mechanics.json`.
 
-## Saving
+## Save / command line
 
-The game saves JSON to `Application.persistentDataPath/save.json` (normally
-`%USERPROFILE%\AppData\LocalLow\Cove Studio\Castaway Cove\save.json`). It autosaves when you sell,
-buy, unlock an island, pause or quit, and F5/F9 save or load on demand.
+Save path: `%USERPROFILE%\AppData\LocalLow\Cove Studio\Castaway Cove\save.json`.
+Flags: `-selfTest` / `--self-test <file>`, `--screenshot <file> --shot-ui <screen>`.
 
-## Command-line options
+## Known limits
 
-- `--screenshot <file.png>` — starts the game, draws about 120 frames, saves the window's picture
-  to the PNG and exits with code 0. The window is pushed behind other windows and does not need
-  focus, and rendering continues while unfocused.
-- `--self-test <file.json>` or `-selfTest` — runs the full automated check without human input:
-  spawn, movement, cast, forced bite, hook, reel, catch (landed alive), fight, collect, bag,
-  sell, buy, save/load and HUD checks.
-  It writes a JSON result (per-step pass/fail, timings, final money/bag, errors) to the given path,
-  or to `self-test.json` in the persistent data folder when no path is given. The JSON is also
-  printed to Unity's player log (standalone Unity redirects process stdout there), and the game
-  exits with code 0 only when every step passed.
-- `--shot-ui menu|shop|quests|pause` — with `--screenshot`, shows that screen in the captured
-  picture (used for checking the UI layout).
+- No multiplayer, music, settings menu or gamepad.
+- Cooking/gacha/casino are simplified; Killscore has no 360/no-scope/dogfight.
+- No character customization; skins tint weapons only.
+- All islands share one shop; boss AI is a shared charge/stun frame.
+- Balance values are initial estimates.
 
-## Self-test status
+## Versions
 
-The included build passes all 16 steps. See `test-results/self-test.json` for the latest run:
-spawn, move (3.6 m), cast, hook, reel (8.4 s), catch (landed alive), pistol fight, collect, bag,
-act, sell, buy, save, load, HUD and boss all passed; final money $315, bag 0, 0 errors. The player also
-exits with code 0.
+- **0.2.0** (2026-11-12): five islands and bosses, quests, radar, cooking, Drip, Fishipedia,
+  gacha/casino, difficulty, dynamite, seagulls; 18-step self-test.
+- **0.1.0** (2026-11-12): initial fishing/combat prototype. See `CHANGELOG.md`.
 
-## Contents
+## Download
 
-- `Assets/Scripts/` — all gameplay, world generation, UI and audio code.
-- `Assets/Editor/CraftBuild.cs` — builds `Assets/Scenes/Main.unity` and the Windows player.
-- `MECHANICS.md` — every tunable number and where it comes from (all original estimates).
-- `mechanics.json` — the same values in machine-readable form.
-- `NOTES.md` — what is implemented, what is not, and known limits.
-- `shots/` — screenshots captured with `--screenshot`.
+Latest build: [GitHub Releases](https://github.com/tinycorn-studio/castaway-cove/releases/latest).
+Build output and installers are not committed.
+
+## Credits
+
+CC0 assets and licenses: `CREDITS.md`, `Assets/CC0/SOURCES.md`, `Assets/CC0/Licenses/`.
+Original code and content: TinyCorn Studio, MIT (`LICENSE`).

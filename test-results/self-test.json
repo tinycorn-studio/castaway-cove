@@ -12,7 +12,7 @@
         {
             "step": "move",
             "passed": true,
-            "detail": "walked 3.58 m forward (need 1.5 m)",
+            "detail": "walked 3.59 m forward (need 1.5 m)",
             "ms": 1599.0
         },
         {
@@ -43,13 +43,13 @@
             "step": "fight",
             "passed": true,
             "detail": "pistol shot damaged the landed fish and the follow-up killed it",
-            "ms": 191.0
+            "ms": 193.0
         },
         {
             "step": "collect",
             "passed": true,
             "detail": "collected the kill into the bag (1 / 8)",
-            "ms": 99.0
+            "ms": 100.0
         },
         {
             "step": "bag",
@@ -79,29 +79,41 @@
             "step": "save",
             "passed": true,
             "detail": "save.json written with money $15 at C:/Users/LamHD/AppData/LocalLow/Cove Studio/Castaway Cove\\save.json",
-            "ms": 15.0
+            "ms": 14.0
         },
         {
             "step": "load",
             "passed": true,
             "detail": "reloaded save: money restored to $15, bag empty",
-            "ms": 0.0
+            "ms": 1.0
         },
         {
             "step": "hud",
             "passed": true,
-            "detail": "HUD shows money $15, bag 0 / 8, weapon Pistol  7 / 16, HP and hunger bars, and interaction text \"E   Read the quest board\"",
+            "detail": "HUD shows money $15, bag 0 / 8, weapon Pistol  7 / 16   ·   Dyn 0, HP and hunger bars, and interaction text \"E   Read the quest board\"",
             "ms": 0.0
         },
         {
             "step": "boss",
             "passed": true,
             "detail": "killed the Spider Crab, collected its shell, earned $300 and opened Isle Two",
-            "ms": 289.0
+            "ms": 288.0
+        },
+        {
+            "step": "bosses",
+            "passed": true,
+            "detail": "defeated Piranha, Pufferfish, Albatross and Whale; Isles 3, 4 and 5 opened",
+            "ms": 667.0
+        },
+        {
+            "step": "services",
+            "passed": true,
+            "detail": "cooked a fish for 1.5x, spun a skin, bought dynamite, toggled difficulty and logged the Fishipedia",
+            "ms": 10.0
         }
     ],
-    "finalMoney": 315,
+    "finalMoney": 2235,
     "bagCount": 0,
-    "totalMs": 14109.0,
+    "totalMs": 14782.0,
     "errors": []
 }

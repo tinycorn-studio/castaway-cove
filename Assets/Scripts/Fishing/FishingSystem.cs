@@ -520,7 +520,7 @@ namespace Cove
         private void LandFish()
         {
             var game = GameBoot.I;
-            var fish = GameData.RollFish(Rng, BaitUsed);
+            var fish = GameData.RollFish(Rng, BaitUsed, game.CurrentIslandIndex + 1);
             LastCatch = fish;
             ClearHeldFish();
             Audio.Play(Audio.Fanfare, 0.8f, 1f);
@@ -528,6 +528,8 @@ namespace Cove
             GameBoot.I.UI.SetPrompt("");
 
             game.State.catchCount++;
+            if (game.State.catchCount == 1) game.UnlockAchievement("First Catch");
+            game.DiscoverFish(fish);
             game.UI.RefreshHud();
             game.UI.ShowCatch(fish, false);
             if (game.Combat != null) game.Combat.SpawnCaughtFish(fish);

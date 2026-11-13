@@ -18,15 +18,33 @@ namespace Cove
         public AudioLibrary Audio;
         public Boat Boat;
         public CrabBoss Boss;
+        public IslandBoss ActiveIslandBoss;
         public GameObject BossShell;
+        public GameObject BossTrophy;
+        public int ActiveIslandBossType;
         public bool bossSpawned;
         public System.Random Rng;
 
         public bool Playing;
-        public bool Busy;
-        public GameObject PlayerObject;
+        public bool Busy;        public GameObject PlayerObject;
         public Camera MainCamera;
         public Light MainLight;
+
+        public int CurrentIslandIndex
+        {
+            get
+            {
+                if (World == null || Player == null || World.Islands == null || World.Islands.Count == 0) return 0;
+                int best = 0;
+                float bestDistance = float.MaxValue;
+                for (int i = 0; i < World.Islands.Count; i++)
+                {
+                    float d = Vector3.Distance(Player.transform.position, World.Islands[i].center);
+                    if (d < bestDistance) { bestDistance = d; best = i; }
+                }
+                return best;
+            }
+        }
 
         private bool selfTestMode;
         private bool screenshotMode;
@@ -240,6 +258,9 @@ namespace Cove
             UI.ShowShop(false);
             UI.ShowQuests(false);
             UI.ShowWeapons(false);
+            UI.ShowGrill(false);
+            UI.ShowFishipedia(false);
+            UI.ShowFortune(false);
             Playing = true;
             Player.inputEnabled = true;
             Time.timeScale = 1f;
@@ -256,12 +277,17 @@ namespace Cove
 
         private void NewGameState()
         {
+            bool keepHard = State.hardMode;
             State.ResetToDefaults();
+            State.hardMode = keepHard;
             quest2Announced = false;
             quest3Announced = false;
             bossSpawned = false;
             BossShell = null;
+            BossTrophy = null;
+            ActiveIslandBossType = 0;
             if (Boss != null) { Destroy(Boss.gameObject); Boss = null; }
+            if (ActiveIslandBoss != null) { Destroy(ActiveIslandBoss.gameObject); ActiveIslandBoss = null; }
             var fishEnemies = FindObjectsOfType<FishEnemy>();
             for (int i = 0; i < fishEnemies.Length; i++) if (fishEnemies[i] != null) Destroy(fishEnemies[i].gameObject);
             if (Player != null)
@@ -351,10 +377,22 @@ namespace Cove
             }
         }
 
+        public void ToggleDifficulty()
+        {
+            State.hardMode = !State.hardMode;
+            UI.RefreshDifficulty();
+            UI.Toast("Difficulty set to " + (State.hardMode ? "Hard: tougher creatures, more damage." : "Normal.") + " Applies to newly spawned creatures.");
+        }
+
         public void ToggleBoat()
         {
             if (!Playing) return;
             if (Player == null || Boat == null) return;
+            if (!Player.InBoat && !State.boatKeys)
+            {
+                UI.Toast("The rowboat is locked. Defeat the Spider Crab and hand its shell to Mira for the keys.");
+                return;
+            }
             if (Fishing != null) Fishing.CancelFishing(false);
 
             if (Player.InBoat)
@@ -506,11 +544,37 @@ namespace Cove
         public void RegisterKill(FishEnemy fish)
         {
             State.kills++;
+            if (State.kills == 1) UnlockAchievement("First Kill");
             if (fish != null && !string.IsNullOrEmpty(fish.Fish.killBonus))
                 UI.Toast("Kill bonus: " + fish.Fish.killBonus + "!");
             UI.RefreshHud();
             EvaluateQuests();
             AutoSave();
+        }
+
+        public void DiscoverFish(CaughtFish fish)
+        {
+            if (fish == null) return;
+            if (State.discovered == null) State.discovered = new System.Collections.Generic.List<string>();
+            if (!State.discovered.Contains(fish.species))
+            {
+                State.discovered.Add(fish.species);
+                UI.Toast("Fishipedia: " + fish.species + " discovered.");
+            }
+            if (fish.drip) UnlockAchievement("Drip Collector");
+        }
+
+        public void UnlockAchievement(string name)
+        {
+            if (State.achievements == null) State.achievements = new System.Collections.Generic.List<string>();
+            if (State.achievements.Contains(name)) return;
+            State.achievements.Add(name);
+            UI.Toast("Achievement: " + name);
+        }
+
+        public void CheckMoneyAchievement()
+        {
+            if (State.money >= 10000) UnlockAchievement("Rich! $10,000 on hand");
         }
 
         public void TrySpawnBoss()
@@ -557,10 +621,107 @@ namespace Cove
             if (State.bossKilled) return;
             State.bossKilled = true;
             State.island2 = true;
+            State.boatKeys = true;
+            State.radarOwned = true;
             State.money += 300;
             State.earnedTotal += 300;
             quest2Announced = true;
-            UI.Toast("Spider Crab Shell handed in! $300 reward, and Isle Two is open.");
+            UnlockAchievement("Crab Hunter");
+            UI.Toast("Spider Crab Shell handed in! $300, boat keys and a Radar. Isle Two is open.");
+            if (Audio != null) Audio.Play(Audio.Fanfare, 0.9f, 1f);
+            UI.RefreshHud();
+            UI.RefreshQuests();
+            AutoSave();
+        }
+
+        public static string IslandBossName(int type)
+        {
+            if (type == 1) return "Giant Piranha";
+            if (type == 2) return "Pufferfish";
+            if (type == 3) return "Albatross";
+            return "Bowhead Whale";
+        }
+
+        public bool IslandBossDefeated(int type)
+        {
+            if (type == 1) return State.piranhaKilled;
+            if (type == 2) return State.pufferKilled;
+            if (type == 3) return State.albatrossKilled;
+            return State.whaleKilled;
+        }
+
+        public bool IslandBossUnlocked(int type)
+        {
+            if (type == 1) return State.island2;
+            if (type == 2) return State.island3;
+            if (type == 3) return State.island4;
+            return State.island5;
+        }
+
+        public void TrySpawnIslandBoss(int type)
+        {
+            if (type < 1 || type > 4) return;
+            if (IslandBossDefeated(type))
+            {
+                UI.Toast(IslandBossName(type) + " is already beaten.");
+                return;
+            }
+            if (!IslandBossUnlocked(type))
+            {
+                UI.Toast("Clear the previous island first.");
+                return;
+            }
+            if (ActiveIslandBoss != null && !ActiveIslandBoss.IsDead)
+            {
+                UI.Toast(IslandBossName(type) + " is already here.");
+                return;
+            }
+            var info = World.Islands[type];
+            float lx = 6f;
+            float lz = 5f;
+            float h = MeshGen.IslandHeight(info.radius, info.height, lx, lz, info.seed);
+            var go = new GameObject(IslandBossName(type));
+            go.transform.SetParent(World.transform, false);
+            go.transform.position = new Vector3(info.center.x + lx, h + 0.2f, info.center.z + lz);
+            ActiveIslandBoss = go.AddComponent<IslandBoss>();
+            ActiveIslandBoss.Init(this, go.transform.position, type);
+            ActiveIslandBossType = type;
+            UI.Toast("Bait cast! The " + IslandBossName(type) + " is coming. Dodge its charge and punish the stun.");
+            if (Audio != null) Audio.Play(Audio.BossRoar, 0.8f, type == 4 ? 0.7f : 0.95f);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+
+        public void SpawnBossTrophy(int type, Vector3 pos)
+        {
+            var trophy = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            trophy.name = IslandBossName(type) + " Trophy";
+            trophy.transform.SetParent(World.transform, false);
+            trophy.transform.position = new Vector3(pos.x, pos.y + 0.45f, pos.z);
+            trophy.transform.localScale = new Vector3(0.8f, 0.55f, 0.8f);
+            Color c = type == 1 ? new Color32(0xB8, 0x3A, 0x32, 0xFF) : type == 2 ? new Color32(0xD9, 0x9A, 0x3A, 0xFF) : type == 3 ? new Color32(0xE8, 0xE5, 0xD8, 0xFF) : new Color32(0x5B, 0x7A, 0x8C, 0xFF);
+            trophy.GetComponent<MeshRenderer>().sharedMaterial = WorldBuilder.MakeMat("bossTrophy", c, 0.35f);
+            var col = trophy.GetComponent<Collider>();
+            if (col != null) col.isTrigger = true;
+            var interact = trophy.AddComponent<Interactable>();
+            interact.prompt = "E   Collect the " + IslandBossName(type) + " trophy";
+            interact.onInteract = () =>
+            {
+                CompleteIslandBoss(type);
+                Destroy(trophy);
+            };
+            BossTrophy = trophy;
+        }
+
+        public void CompleteIslandBoss(int type)
+        {
+            if (IslandBossDefeated(type)) return;
+            if (type == 1) { State.piranhaKilled = true; State.island3 = true; State.money += 200; State.earnedTotal += 200; UI.Toast("Giant Piranha defeated! $200 and Isle Three are yours."); UnlockAchievement("Piranha Hunter"); }
+            else if (type == 2) { State.pufferKilled = true; State.island4 = true; State.money += 300; State.earnedTotal += 300; UI.Toast("Pufferfish defeated! $300 and Isle Four are yours."); UnlockAchievement("Pufferfish Hunter"); }
+            else if (type == 3) { State.albatrossKilled = true; State.island5 = true; State.money += 400; State.earnedTotal += 400; UI.Toast("Albatross defeated! $400 and Isle Five are yours."); UnlockAchievement("Albatross Hunter"); }
+            else { State.whaleKilled = true; State.money += 1000; State.earnedTotal += 1000; UI.Toast("The Bowhead Whale is down. You are home — the cove is safe!"); UnlockAchievement("Homecoming"); }
+            ActiveIslandBossType = 0;
+            CheckMoneyAchievement();
             if (Audio != null) Audio.Play(Audio.Fanfare, 0.9f, 1f);
             UI.RefreshHud();
             UI.RefreshQuests();
@@ -630,6 +791,190 @@ namespace Cove
             AutoSave();
         }
 
+        public void BuyDynamite()
+        {
+            if (State.money < GameData.DynamitePrice)
+            {
+                UI.Toast("Not enough money for dynamite.");
+                Audio.Play(Audio.Error, 0.6f, 1f);
+                return;
+            }
+            State.money -= GameData.DynamitePrice;
+            State.dynamite++;
+            Audio.Play(Audio.Buy, 0.7f, 1f);
+            UI.Toast("Bought a dynamite stick. Press 5 to throw it.");
+            UI.RefreshHud();
+            AutoSave();
+        }
+
+        public void OpenGrill()
+        {            if (!Playing) return;
+            if (Fishing != null) Fishing.CancelFishing(false);
+            UI.ShowShop(false);
+            UI.ShowQuests(false);
+            UI.ShowWeapons(false);
+            UI.ShowGrill(true);
+            UI.RefreshHud();
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        public void CloseGrill()
+        {
+            UI.ShowGrill(false);
+            if (Playing && !UI.AnyPanelOpen) { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
+        }
+
+        public void CookAll(bool safe)
+        {
+            if (State.bag.Count == 0)
+            {
+                UI.Toast("No fish to cook. Catch some first.");
+                return;
+            }
+            int cooked = 0;
+            int burned = 0;
+            for (int i = 0; i < State.bag.Count; i++)
+            {
+                var fish = State.bag[i];
+                if (fish.cooked) continue;
+                bool success = safe || Rng.NextDouble() < 0.85;
+                if (success)
+                {
+                    fish.value = Mathf.Max(1, Mathf.RoundToInt(fish.value * 1.5f));
+                    fish.cooked = true;
+                    cooked++;
+                }
+                else
+                {
+                    fish.value = Mathf.Max(1, Mathf.RoundToInt(fish.value * 0.1f));
+                    fish.cooked = true;
+                    fish.burned = true;
+                    burned++;
+                }
+            }
+            if (cooked == 0 && burned == 0)
+            {
+                UI.Toast("Everything in your bag is already cooked.");
+                return;
+            }
+            UI.Toast(safe ? "Lava-cooked " + cooked + " fish for 1.5x value." : "Cooked " + cooked + " fish" + (burned > 0 ? ", burned " + burned : "") + ".");
+            if (Audio != null) Audio.Play(Audio.Buy, 0.7f, 1.2f);
+            CheckMoneyAchievement();
+            UI.RefreshHud();
+            AutoSave();
+        }
+
+        public void OpenFishipedia()
+        {
+            if (!Playing) return;
+            if (Fishing != null) Fishing.CancelFishing(false);
+            UI.ShowShop(false);
+            UI.ShowQuests(false);
+            UI.ShowWeapons(false);
+            UI.ShowGrill(false);
+            UI.ShowFortune(false);
+            UI.ShowFishipedia(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        public void CloseFishipedia()
+        {
+            UI.ShowFishipedia(false);
+            if (Playing && !UI.AnyPanelOpen) { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
+        }
+
+        public void OpenFortune()
+        {
+            if (!Playing) return;
+            if (Fishing != null) Fishing.CancelFishing(false);
+            UI.ShowShop(false);
+            UI.ShowQuests(false);
+            UI.ShowWeapons(false);
+            UI.ShowGrill(false);
+            UI.ShowFishipedia(false);
+            UI.ShowFortune(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        public void CloseFortune()
+        {
+            UI.ShowFortune(false);
+            if (Playing && !UI.AnyPanelOpen) { Cursor.lockState = CursorLockMode.Locked; Cursor.visible = false; }
+        }
+
+        public static string SkinName(int index)
+        {
+            if (index == 1) return "Coral";
+            if (index == 2) return "Abyss";
+            if (index == 3) return "Gold";
+            if (index == 4) return "Mint";
+            return "Default";
+        }
+
+        public void SpinGacha()
+        {
+            int dripIndex = -1;
+            for (int i = 0; i < State.bag.Count; i++) if (State.bag[i].drip) { dripIndex = i; break; }
+            if (dripIndex >= 0) State.bag.RemoveAt(dripIndex);
+            else if (State.money >= 100) State.money -= 100;
+            else
+            {
+                UI.Toast("The Reel needs a Drip fish or $100.");
+                Audio.Play(Audio.Error, 0.6f, 1f);
+                return;
+            }
+            int skin = Rng.Next(1, 5);
+            State.skinIndex = skin;
+            if (Combat != null) Combat.ApplySkin(skin);
+            UnlockAchievement("Reel of Fortune");
+            UI.Toast("Skin unlocked: " + SkinName(skin) + "!");
+            if (Audio != null) Audio.Play(Audio.Fanfare, 0.8f, 1.1f);
+            CheckMoneyAchievement();
+            UI.RefreshHud();
+            AutoSave();
+        }
+
+        public void PlayRoulette()
+        {
+            if (State.money < 50)
+            {
+                UI.Toast("Roulette costs $50.");
+                Audio.Play(Audio.Error, 0.6f, 1f);
+                return;
+            }
+            State.money -= 50;
+            int roll = Rng.Next(0, 37);
+            int win = roll == 0 ? 1750 : roll % 2 == 0 ? 100 : 0;
+            State.money += win;
+            if (win > 0) UnlockAchievement("High Roller");
+            UI.Toast("Roulette " + roll + ": " + (win > 0 ? "won " + GameData.Money(win) : "lost the bet") + ".");
+            CheckMoneyAchievement();
+            UI.RefreshHud();
+            AutoSave();
+        }
+
+        public void PlaySlots()
+        {
+            if (State.money < 25)
+            {
+                UI.Toast("Slots cost $25.");
+                Audio.Play(Audio.Error, 0.6f, 1f);
+                return;
+            }
+            State.money -= 25;
+            double r = Rng.NextDouble();
+            int win = r < 0.55 ? 0 : r < 0.90 ? 50 : r < 0.98 ? 75 : 250;
+            State.money += win;
+            if (win > 0) UnlockAchievement("High Roller");
+            UI.Toast("Slots: " + (win > 0 ? "won " + GameData.Money(win) : "no match") + ".");
+            CheckMoneyAchievement();
+            UI.RefreshHud();
+            AutoSave();
+        }
+
         private void AutoSave()
         {
             if (selfTestMode) return;
@@ -680,7 +1025,20 @@ namespace Cove
             State.earnedTotal = data.earnedTotal;
             State.island2 = data.island2;
             State.island3 = data.island3;
+            State.island4 = data.island4;
+            State.island5 = data.island5;
             State.catchQuestDone = data.catchQuestDone;
+            State.boatKeys = data.boatKeys;
+            State.radarOwned = data.radarOwned;
+            State.piranhaKilled = data.piranhaKilled;
+            State.pufferKilled = data.pufferKilled;
+            State.albatrossKilled = data.albatrossKilled;
+            State.whaleKilled = data.whaleKilled;
+            State.discovered = data.discovered != null ? new System.Collections.Generic.List<string>(data.discovered) : new System.Collections.Generic.List<string>();
+            State.achievements = data.achievements != null ? new System.Collections.Generic.List<string>(data.achievements) : new System.Collections.Generic.List<string>();
+            State.skinIndex = data.skinIndex;
+            State.hardMode = data.hardMode;
+            State.dynamite = Mathf.Max(0, data.dynamite);
             State.hp = data.hp > 0f ? Mathf.Clamp(data.hp, 1f, 100f) : 100f;
             State.hunger = Mathf.Clamp(data.hunger, 0f, 100f);
             State.kills = Mathf.Max(0, data.kills);
@@ -697,7 +1055,11 @@ namespace Cove
             quest2Announced = data.island2;
             quest3Announced = data.island3;
             bossSpawned = false;
+            BossShell = null;
+            BossTrophy = null;
+            ActiveIslandBossType = 0;
             if (Boss != null) { Destroy(Boss.gameObject); Boss = null; }
+            if (ActiveIslandBoss != null) { Destroy(ActiveIslandBoss.gameObject); ActiveIslandBoss = null; }
 
             if (Player != null)
             {
@@ -744,6 +1106,9 @@ namespace Cove
             UI.ShowShop(false);
             UI.ShowQuests(false);
             UI.ShowWeapons(false);
+            UI.ShowGrill(false);
+            UI.ShowFishipedia(false);
+            UI.ShowFortune(false);
             UI.ShowMenu(true, SaveSystem.Exists());
             Player.inputEnabled = false;
             Cursor.lockState = CursorLockMode.None;
@@ -767,11 +1132,20 @@ namespace Cove
                 return;
             }
 
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                if (UI.FishipediaOpen) CloseFishipedia();
+                else if (!UI.AnyPanelOpen) OpenFishipedia();
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 if (UI.ShopOpen) { UI.ShowShop(false); }
                 else if (UI.QuestOpen) { UI.ShowQuests(false); }
                 else if (UI.WeaponOpen) { UI.ShowWeapons(false); }
+                else if (UI.GrillOpen) { UI.ShowGrill(false); }
+                else if (UI.FishipediaOpen) { UI.ShowFishipedia(false); }
+                else if (UI.FortuneOpen) { UI.ShowFortune(false); }
                 else if (UI.Paused) { SetPaused(false); }
                 else { SetPaused(true); }
             }
@@ -799,8 +1173,26 @@ namespace Cove
             UI.SetUnderwater(under);
             if (UI.WorldStatus != null && Time.frameCount % 30 == 0)
             {
-                string status = State.island3 ? "All islands open" : State.island2 ? "Isle Two open · Isle Three needs $500" : "Isle Two needs $100 earned";
-                UI.WorldStatus.text = status;
+                if (Time.frameCount % 120 == 0) CheckMoneyAchievement();
+                if (State.radarOwned && UI.RadarPanel != null && Player != null)
+                {
+                    var sb = new System.Text.StringBuilder();
+                    for (int i = 0; i < World.Islands.Count; i++)
+                    {
+                        var isl = World.Islands[i];
+                        float dist = Vector3.Distance(Player.transform.position, isl.center);
+                        bool open = i == 0 || (i == 1 && State.island2) || (i == 2 && State.island3) || (i == 3 && State.island4) || (i == 4 && State.island5);
+                        sb.AppendLine(isl.name + "   " + Mathf.RoundToInt(dist) + " m   " + (open ? "OPEN" : "LOCKED"));
+                    }
+                    UI.SetRadar(true, sb.ToString());
+                    UI.WorldStatus.text = "";
+                }
+                else
+                {
+                    UI.SetRadar(false, "");
+                    string status = State.island5 ? "All islands open" : State.island4 ? "Isle Five needs the Albatross" : State.island3 ? "Isle Four needs the Pufferfish" : State.island2 ? "Isle Three needs the Giant Piranha" : "Isle Two needs the Spider Crab";
+                    UI.WorldStatus.text = status;
+                }
             }
         }
 
@@ -906,6 +1298,33 @@ namespace Cove
                 Combat.EquipWeapon(2);
             }
             else if (shotUi == "weapons") OpenWeapons();
+            else if (shotUi == "fishipedia") OpenFishipedia();
+            else if (shotUi == "grill") OpenGrill();
+            else if (shotUi == "fortune") OpenFortune();
+            else if (shotUi == "piranha")
+            {
+                State.boatKeys = true;
+                State.radarOwned = true;
+                State.island2 = true;
+                State.pistolOwned = true;
+                State.pistolMag = 8;
+                State.pistolAmmo = 16;
+                var info = World.Islands[1];
+                float ph = MeshGen.IslandHeight(info.radius, info.height, 0f, 18f, info.seed);
+                Player.Controller.enabled = false;
+                Player.transform.position = new Vector3(info.center.x, ph + 2.4f, info.center.z + 20f);
+                Player.ForceLook(180f, -2f);
+                TrySpawnIslandBoss(1);
+                Combat.EquipWeapon(2);
+            }
+            else if (shotUi == "radar")
+            {
+                State.radarOwned = true;
+                State.boatKeys = true;
+                State.island2 = true;
+                Player.Teleport(new Vector3(0f, 3.2f, 8f), 0f);
+                Player.ForceLook(180f, 2f);
+            }
             else if (shotUi == "shop") OpenShop();
             else if (shotUi == "quests") OpenQuests();
             else if (shotUi == "pause") SetPaused(true);

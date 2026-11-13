@@ -30,6 +30,12 @@ namespace Cove
             game = g;
             player = g.Player != null ? g.Player.transform : null;
             transform.position = pos;
+            if (g.State.hardMode)
+            {
+                MaxHpValue = Mathf.RoundToInt(MaxHpValue * 1.4f);
+                HpValue = MaxHpValue;
+                ContactDamage = Mathf.RoundToInt(ContactDamage * 1.3f);
+            }
             BuildVisual();
             transform.localScale = Vector3.one * 1.45f;
             SnapToGround();
